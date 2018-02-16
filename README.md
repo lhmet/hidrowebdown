@@ -1,2 +1,3 @@
 # hidrowebdown
-Downloading data from the major database of hydrological data in Brazil - Hidroweb - National Water Agency (ANA) in your R session as a tidy data frame.
+Downloading data from the major database of hydrological data in Brazil ([Hidroweb](http://hidroweb.ana.gov.br) - National Water Agency ([ANA](www.ana.gov.br)) from R.
+
