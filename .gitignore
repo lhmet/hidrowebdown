@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 inst/doc
-README.Rmd
 README.html
 NEWS.Rmd
 NEWS.html
