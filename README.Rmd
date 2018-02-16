@@ -1,26 +1,35 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-hidrowebdown
-============
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+# hidrowebdown
 
 Downloading data from the major database of hydrological data in Brazil ([Hidroweb](http://hidroweb.ana.gov.br) - National Water Agency ([ANA](www.ana.gov.br)) from R.
 
-Installation
-------------
+## Installation
 
 You can install hidrowebdown from GitHub with:
 
-``` r
+```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("lhmet/hidrowebdown")
 ```
 
-Example
--------
+## Example
 
 A basic example which shows you how to get data from hidroweb database:
 
-``` r
+```{r example}
 ## basic example code
 ```
 
