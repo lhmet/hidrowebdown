@@ -11,4 +11,5 @@ ByteCompile: true
 Imports: 
     httr,
     stringr,
-    lubridate
+    lubridate,
+    purrr
