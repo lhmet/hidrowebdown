@@ -162,11 +162,11 @@
 
 
 # dowload a station data file from hidroweb ------------------------------------
-.get_hidroweb <- function(station = "2749005"
-                                   , option = "Chuva"
-                                   , verbose = TRUE
-                                   , dest.dir = "../"
-                                   , only.info = FALSE) {
+.get_hidroweb <- function(station = "3253016"
+                          , option = "Chuva"
+                          , verbose = TRUE
+                          , dest.dir = "../"
+                          , only.info = FALSE) {
   
   hidroweb_url <- "http://hidroweb.ana.gov.br/Estacao.asp?Codigo=XXXXXXXX&CriaArq=true&TipoArq=1"
   hidroweb_url <- stringr::str_replace(hidroweb_url, 
@@ -178,6 +178,7 @@
   zfile <- .get_zip_file(opt = option)
 
   # request
+  #cat("POST", "\n")
   r <-  httr::POST(hidroweb_url, body = option_num_l, encode = "form")
 
   if (httr::status_code(r) != 200) {
@@ -189,6 +190,7 @@
     # writeLines(cont); cont <- httr::content(r, encoding = "latin1")
     
     # station coordinates and metadata ----------------------------------------
+    #cat("metadata", "\n")
     stn_info <- .extract_metadata(cont)
     if (only.info) return(stn_info)
     
@@ -199,8 +201,10 @@
                              dest.folder = dest.dir)
 
   gc()
-  out <- mutate(stn_info, file = dest_file)
+  out <- transform(stn_info, file = dest_file)
   return(out)
 } # end download_file_hidroweb
+
+
 
 
