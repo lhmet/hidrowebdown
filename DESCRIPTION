@@ -12,4 +12,8 @@ Imports:
     httr,
     stringr,
     lubridate,
-    purrr
+    purrr,
+    xml2,
+    rvest,
+    Hmisc
+RoxygenNote: 6.0.1
