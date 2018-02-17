@@ -1,39 +1,3 @@
-.hydro_data <- function(content, stn){
-  # cont <- content
-  # nova forma de obter sufixo para hidroweb_url
-  content_split <- stringr::str_split(content, "href=")[[1]]
-  position <- unlist(
-    lapply(
-      content_split,
-      function(x) {
-        stringr::str_detect(x, "ARQ.*ZIP")
-      }
-    )
-  )
-  zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
-  # stringi::stri_unescape_unicode(zip_file_sufix)
-  zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
-  
-  
-  if (! length(zip_file_sufix) > 0) {
-    if (verbose) message("No data found in hidroweb for the stn ",  stn ,". \n")
-    dest_file <- NA
-  }
-  # apenda zip file a url
-  file_url <-  file.path(dirname(hidroweb_url), zip_file_sufix)
-  # arquivo de destino
-  dest_file <- basename(file_url) 
-  dest_file <- gsub(zfile, paste0(dest.dir, stn, "_", option, ".zip"), dest_file)
-  download.file(file_url, destfile = dest_file, mode = "wb")
-  
-  # messages
-  if (file.exists(dest_file)) {
-    if (verbose) message("File for stn ", stn, " saved.\n")
-  } else {
-    if (verbose) warning("File for stn ", stn, " can not be saved.\n")
-  }
-  return(dest_file)
-} 
 
 # parse lon or lat to decimal----------------------- --------------------------
 .coords_dec <- function(x, type = "Longitude"){
@@ -154,12 +118,54 @@
   return(stn_info)
 }
 
+# get hydroweb data for a station------------------------------------------------------------
+.hydro_data <- function(content, url, stn, dest.folder){
+  # cont <- content
+  # nova forma de obter sufixo para hidroweb_url
+  content_split <- stringr::str_split(content, "href=")[[1]]
+  position <- unlist(
+    lapply(
+      content_split,
+      function(x) {
+        stringr::str_detect(x, "ARQ.*ZIP")
+      }
+    )
+  )
+  zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
+  
+  #Error in stringr::str_split(content_split[position], "\\.ZIP")[[1]] : 
+  #  subscript out of bounds
+  
+  # stringi::stri_unescape_unicode(zip_file_sufix)
+  zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
+  
+  
+  if (! length(zip_file_sufix) > 0) {
+    if (verbose) message("No data found in hidroweb for the stn ",  stn ,". \n")
+    dest_file <- NA
+  }
+  # apenda zip file a url
+  file_url <-  file.path(dirname(url), zip_file_sufix)
+  # arquivo de destino
+  dest_file <- basename(file_url) 
+  dest_file <- gsub(zfile, paste0(dest.folder, stn, "_", option, ".zip"), dest_file)
+  download.file(file_url, destfile = dest_file, mode = "wb")
+  
+  # messages
+  if (file.exists(dest_file)) {
+    if (verbose) message("File for stn ", stn, " saved.\n")
+  } else {
+    if (verbose) warning("File for stn ", stn, " can not be saved.\n")
+  }
+  return(dest_file)
+} 
+
 
 # dowload a station data file from hidroweb ------------------------------------
-download_file_hidroweb <- function(station = 3152014
+.get_hidroweb <- function(station = "2749005"
                                    , option = "Chuva"
                                    , verbose = TRUE
-                                   , dest.dir = "../data/zips/"
+                                   , dest.dir = "../"
                                    , only.info = FALSE) {
   
   hidroweb_url <- "http://hidroweb.ana.gov.br/Estacao.asp?Codigo=XXXXXXXX&CriaArq=true&TipoArq=1"
@@ -187,7 +193,10 @@ download_file_hidroweb <- function(station = 3152014
     if (only.info) return(stn_info)
     
     # hydrological data--------------- ----------------------------------------
-    dest_file <- .hydro_data(cont, station)
+    dest_file <- .hydro_data(content = cont, 
+                             url = hidroweb_url, 
+                             stn = station, 
+                             dest.folder = dest.dir)
 
   gc()
   out <- mutate(stn_info, file = dest_file)
