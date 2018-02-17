@@ -5,13 +5,13 @@ Authors@R: person("Jonatan", "Tatsch", email = "jdtatsch@gmail.com",role = c("au
 Description: Downloading data from the major database of hydrological data in
 License: MIT + file LICENSE
 Imports: 
-    Hmisc,
-    httr,
-    lubridate,
-    purrr,
-    rvest,
-    stringr,
-    xml2
+    Hmisc (>= 4.1.1),
+    httr (>= 1.3.1),
+    lubridate (>= 1.7.2),
+    purrr (>= 0.2.4),
+    rvest (>= 0.3.2.9000),
+    stringr (>= 1.2.0),
+    xml2 (>= 1.1.9000)
 Brazil ([Hidroweb](http: //hidroweb.ana.gov.br)-National Water Agency ([ANA](www.ana.gov.br)) from R. 
 ByteCompile: true
 Encoding: UTF-8
