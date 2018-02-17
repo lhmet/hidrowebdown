@@ -1,7 +1,7 @@
 
 #' Get metadata of hydrological stations from Hidroweb database 
 #'
-#' @return data frame with station metadata 
+#' @return data frame with stations metadata 
 #' @export
 #'
 hidroweb_meta <- function(){
@@ -21,12 +21,12 @@ hidroweb_meta <- function(){
     "http://www.snirh.gov.br/hidroweb/Baixar/Software/Invent%C3%A1rio.zip"
   
   tmp_zip <- tempfile(fileext = ".zip")
-  on.exit(file.remove(tmp_zip))
-  download.file(survey_url_file, destfile = tmp_zip)
+   on.exit(file.remove(tmp_zip))
+    download.file(survey_url_file, destfile = tmp_zip)
   
   extracted_file <- unzip(tmp_zip, list = TRUE)[["Name"]]
-  on.exit(file.remove(extracted_file))
-  unzip(tmp_zip, exdir = dirname(tmp_zip))
+   on.exit(file.remove(extracted_file))
+    unzip(tmp_zip, exdir = dirname(tmp_zip))
         
   mdb_file <- file.path(dirname(tmp_zip), extracted_file)
   # file.exists(mdb_file)
