@@ -1,19 +1,19 @@
 Package: hidrowebdown
-Version: 0.1.0
 Title: Download hydrological data from Hidroweb-ANA.
-Description: Downloading data from the major database of hydrological data in
-Brazil ([Hidroweb](http: //hidroweb.ana.gov.br)-National Water Agency ([ANA](www.ana.gov.br)) from R. 
+Version: 0.1.0
 Authors@R: person("Jonatan", "Tatsch", email = "jdtatsch@gmail.com",role = c("aut", "cre"))
+Description: Downloading data from the major database of hydrological data in
 License: MIT + file LICENSE
-Encoding: UTF-8
-LazyData: true
-ByteCompile: true
 Imports: 
+    Hmisc,
     httr,
-    stringr,
     lubridate,
     purrr,
-    xml2,
     rvest,
-    Hmisc
+    stringr,
+    xml2
+Brazil ([Hidroweb](http: //hidroweb.ana.gov.br)-National Water Agency ([ANA](www.ana.gov.br)) from R. 
+ByteCompile: true
+Encoding: UTF-8
+LazyData: true
 RoxygenNote: 6.0.1
