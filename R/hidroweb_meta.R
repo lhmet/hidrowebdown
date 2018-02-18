@@ -34,7 +34,13 @@
 #' @importFrom utils download.file unzip
 #' @importFrom rlang !! :=
 #' @return data frame with stations metadata
-#' @export
+#' @export 
+#' @examples 
+#' \dontrun{
+#' # how hidro_metadata was generated
+#' # donwload a mdb file of  ~200 Mb
+#' hidro_metadata <- hidroweb_meta()
+#' }
 #'
 hidroweb_meta <- function() {
   

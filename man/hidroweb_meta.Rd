@@ -12,3 +12,11 @@ data frame with stations metadata
 \description{
 Get metadata of hydrological stations from Hidroweb database
 }
+\examples{
+\dontrun{
+# how hidro_metadata was generated
+# donwload a mdb file of  ~200 Mb
+hidro_metadata <- hidroweb_meta()
+}
+
+}
