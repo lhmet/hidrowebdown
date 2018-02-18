@@ -8,4 +8,5 @@ utils::globalVariables(c("verbose", "zfile", "option",
                          ))
 
 
+# function to deal with accents
 no_accent <- function(x) stringi::stri_trans_general(x, "latin-ascii")
