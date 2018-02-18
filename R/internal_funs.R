@@ -17,8 +17,8 @@
 # clean station attributes: code (Código), name (Nome) or river 
 .station_attr <- function(x, type = "Código"){
   
-  info_char <- c("Código", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", "Município",
-            "Operadora", "Responsável", "Código Adicional")
+  info_char <- no_accent(c("Código", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", "Município",
+            "Operadora", "Responsável", "Código Adicional"))
   stopifnot(type %in% info_char)
   
   res <- stringr::str_trim(
@@ -103,14 +103,14 @@
   #purrr::map(info, function(itype) .station_attr(x, type = itype))
 
   # dataframe com resultados
-  stn_info <- data.frame(code = .station_attr(x, type = "Código"),
+  stn_info <- data.frame(code = .station_attr(x, type = "Codigo"),
                          lon = lon,
                          lat = lat,
                          alt = alt,
                          area = adren, 
                          name = .station_attr(x, type = "Nome"),
                          state = .station_attr(x, type = "Estado"),
-                         city = .station_attr(x, type = "Município"),
+                         city = .station_attr(x, type = "Municipio"),
                          river = .station_attr(x, type = "Rio"),
                          basin = .station_attr(x, type = "Bacia"),
                          subbasin = .station_attr(x, type = "Sub-bacia"),
@@ -187,8 +187,10 @@
     stop("\nThe Hidroweb website does not appear to be responding.\n",
                                           "Please try again later.\n")
   }
-    cont <- base::rawToChar(r$content) 
-    base::Encoding(cont) <- "latin1"
+    #cont <- base::rawToChar(r$content) 
+    #base::Encoding(cont) <- "latin1"
+    cont <- httr::content(r, as = "text", encoding = "latin1")
+    cont <- no_accent(cont)
     # writeLines(cont); cont <- httr::content(r, encoding = "latin1")
     
     # station coordinates and metadata ----------------------------------------
