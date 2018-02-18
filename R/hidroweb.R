@@ -7,7 +7,7 @@
 #                           verbose,
 #                           dest.dir = "../",
 #                           ){
-#   # change args names
+#   # change args names, expand.grid, check inputs
 #   purrr::map_df(id, ~.get_hidroweb(.x, 
 #                                    option = data.type,
 #                                    .verbose = verbose,
