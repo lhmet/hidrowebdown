@@ -31,7 +31,7 @@
 
 
 #' Get metadata of hydrological stations from Hidroweb database
-#'
+#' @importFrom utils download.file unzip
 #' @return data frame with stations metadata
 #' @export
 #'
@@ -43,9 +43,9 @@ hidroweb_meta <- function() {
   
   tmp_zip <- tempfile(fileext = ".zip")
   on.exit(file.remove(tmp_zip))
-  download.file(survey_url_file, destfile = tmp_zip)
+  utils::download.file(survey_url_file, destfile = tmp_zip)
   
-  extracted_file <- unzip(tmp_zip, list = TRUE)[["Name"]]
+  extracted_file <- utils::unzip(tmp_zip, list = TRUE)[["Name"]]
   unzip(tmp_zip, exdir = dirname(tmp_zip))
   
   mdb_file <- file.path(dirname(tmp_zip), extracted_file)
@@ -55,14 +55,15 @@ hidroweb_meta <- function() {
   # d <- Hmisc::mdb.get(mdb_file)
   # Hmisc::contents(d)
   # Hmisc::mdb.get(mdb_file, tables=TRUE)
-  sel_tables <- c("Estacao", "Municipio", "Estado", "Bacia", "SubBacia", "Rio")
+  sel_tables <- c("Estacao", "Municipio", "Estado", "Bacia", 
+                  "SubBacia", "Rio")
   tables <- Hmisc::mdb.get(mdb_file, tables = sel_tables)
   tables_u <- lapply(
     sel_tables,
     function(itbl_nm) {
       # itbl_nm <- "Estacao"
       itbl <- tables[[itbl_nm]]
-      itbl <- dplyr::mutate_if(itbl, is.factor, as.character)
+      itbl <- dplyr::mutate_if(itbl, is.factor, no_accent)
       # vars to be renamed for merge
       var_cod <- paste0(itbl_nm, "Codigo")
       var_nm <- paste0(itbl_nm, "Nome")
