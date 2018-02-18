@@ -3,6 +3,10 @@
 #' A dataset containing coordinates and additional attributes of 46036
 #'  hydrological stations
 #'
+#'@name hidro_metadata
+#'@keywords datasets
+#'@docType data
+#'
 #' @format A data frame with 46036 rows and 13 variables:
 #' \describe{
 #' \item{Codigo}{station code ID}
