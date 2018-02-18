@@ -29,10 +29,10 @@ devtools::install_github("lhmet/hidrowebdown")
 
 Find a hydrological station.
 
-```{r example}
+```{r}
 library(hidrowebdown)
 # metadata
-hidro_metada
+head(hidro_metadata)
 ```
 
 Get data.
