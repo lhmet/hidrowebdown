@@ -14,6 +14,7 @@
 #' \item{Latitude}{in decimal degrees}
 #' \item{Altitude}{masl}
 #' \item{AreaDrenagem}{Drainage area, Km2}
+#' \item{Nome}{station name}
 #' \item{TipoEstacao}{station type}
 #' \item{Municipio}{city}
 #' \item{Estado}{state name}
