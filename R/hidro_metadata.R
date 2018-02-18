@@ -24,6 +24,4 @@
 #' \item{Rio}{river name}
 #' }
 #' @source \url{http://hidroweb.ana.gov.br/HidroWeb.asp?TocItem=6010#inventario}
-#' @example 
-#' comments(hidro_metadata)
 "hidro_metadata"
