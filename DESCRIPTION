@@ -1,8 +1,13 @@
 Package: hidrowebdown
 Title: Download hydrological data from Hidroweb-ANA
 Version: 0.1.0
-Authors@R: person("Jonatan", "Tatsch", email = "jdtatsch@gmail.com",role = c("aut", "cre"))
-Description: Downloading data from the major database of hydrological data in Brazil from R
+Authors@R: 
+    person(given = "Jonatan",
+           family = "Tatsch",
+           role = c("aut", "cre"),
+           email = "jdtatsch@gmail.com")
+Description: Downloading data from the major database of
+    hydrological data in Brazil from R
 License: MIT + file LICENSE
 Imports: 
     dplyr (>= 0.7.4),
