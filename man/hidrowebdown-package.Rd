@@ -6,7 +6,7 @@
 \alias{hidrowebdown-package}
 \title{hidrowebdown: Download hydrological data from Hidroweb-ANA}
 \description{
-Downloading data from the major database of
+hidrowebdown provides functions for download data from the major database of
 hydrological data in Brazil from R
 }
 \seealso{
