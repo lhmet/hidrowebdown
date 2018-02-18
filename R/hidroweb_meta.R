@@ -133,13 +133,12 @@ hidroweb_meta <- function() {
                      "Codigo" = EstacaoCodigo
   )
   
-  
-  
+
   comment(m) <- paste0(
     "Updated on Hidroweb in:",
     .last_update_metadata()
   )
-  return(m)
+  return(tibble::as_tibble(m))
 }
 
 # hidro_metada <- hidroweb_meta()
