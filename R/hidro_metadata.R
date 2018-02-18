@@ -13,5 +13,5 @@
 #' \item{Nome}{station name}
 #' ...
 #' }
-#' @source \url{http://www.diamondse.info/}
+#' @source \url{http://hidroweb.ana.gov.br/HidroWeb.asp?TocItem=6010#inventario}
 "hidro_metadata"

@@ -15,7 +15,7 @@
 ...
 }}
 \source{
-\url{http://www.diamondse.info/}
+\url{http://hidroweb.ana.gov.br/HidroWeb.asp?TocItem=6010#inventario}
 }
 \usage{
 hidro_metadata

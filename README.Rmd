@@ -27,10 +27,17 @@ devtools::install_github("lhmet/hidrowebdown")
 
 ## Example
 
-A basic example which shows you how to get data from hidroweb database:
+Find a hydrological station.
 
 ```{r example}
-## basic example code
+library(hidrowebdown)
+# metadata
+hidro_metada
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+Get data.
+
+```{r}
+# hidroweb_import()
+```
+
