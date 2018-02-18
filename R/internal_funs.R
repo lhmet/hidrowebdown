@@ -14,7 +14,7 @@
   return(coord)
 }
 
-# clean station attributes: code (Código), name (Nome) or river ()
+# clean station attributes: code (Código), name (Nome) or river 
 .station_attr <- function(x, type = "Código"){
   
   info_char <- c("Código", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", "Município",
@@ -118,8 +118,10 @@
   return(stn_info)
 }
 
+
 # get hydroweb data for a station------------------------------------------------------------
-.hydro_data <- function(content, url, stn, dest.folder){
+#' @importFrom utils download.file 
+.hydro_data <- function(content, url, stn, dest.folder, verbose = TRUE){
   # cont <- content
   # nova forma de obter sufixo para hidroweb_url
   content_split <- stringr::str_split(content, "href=")[[1]]
@@ -149,7 +151,7 @@
   # arquivo de destino
   dest_file <- basename(file_url) 
   dest_file <- gsub(zfile, paste0(dest.folder, stn, "_", option, ".zip"), dest_file)
-  download.file(file_url, destfile = dest_file, mode = "wb")
+  utils::download.file(file_url, destfile = dest_file, mode = "wb")
   
   # messages
   if (file.exists(dest_file)) {
