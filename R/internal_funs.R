@@ -17,8 +17,9 @@
 # clean station attributes: code (Código), name (Nome) or river 
 .station_attr <- function(x, type = "Código"){
   
-  info_char <- no_accent(c("Código", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", "Município",
-            "Operadora", "Responsável", "Código Adicional"))
+  info_char <- c("Codigo", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", 
+                 "Municipio", "Operadora", "Responsavel", "Codigo Adicional")
+  
   stopifnot(type %in% info_char)
   
   res <- stringr::str_trim(
