@@ -7,7 +7,7 @@
 hidroweb_meta()
 }
 \value{
-data frame with station metadata
+data frame with stations metadata
 }
 \description{
 Get metadata of hydrological stations from Hidroweb database
