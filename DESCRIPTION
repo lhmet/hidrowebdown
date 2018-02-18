@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "jdtatsch@gmail.com")
 Description: hidrowebdown provides functions to download data from the major database of
-    hydrological data in Brazil from R.
+    hydrological data in Brazil.
 Depends: R (>= 2.10.0)
 License: MIT + file LICENSE
 Imports: 

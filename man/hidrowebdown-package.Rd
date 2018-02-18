@@ -7,7 +7,7 @@
 \title{hidrowebdown: Download hydrological data from Hidroweb-ANA}
 \description{
 hidrowebdown provides functions to download data from the major database of
-hydrological data in Brazil from R.
+hydrological data in Brazil.
 }
 \seealso{
 Useful links:
