@@ -32,7 +32,7 @@
 
 #' Get metadata of hydrological stations from Hidroweb database
 #' @importFrom utils download.file unzip
-#' @importFrom rlang `!!` `:=`
+#' @importFrom rlang !! :=
 #' @return data frame with stations metadata
 #' @export
 #'
