@@ -4,9 +4,16 @@
 \name{hidrowebdown-package}
 \alias{hidrowebdown}
 \alias{hidrowebdown-package}
-\title{hidrowebdown: Download hydrological data from Hidroweb-ANA.}
+\title{hidrowebdown: Download hydrological data from Hidroweb-ANA}
 \description{
-Downloading data from the major database of hydrological data in Brazil ([Hidroweb](http: //hidroweb.ana.gov.br)-National Water Agency ([ANA](www.ana.gov.br)) from R
+Downloading data from the major database of hydrological data in Brazil ([Hidroweb](http: //hidroweb.ana.gov.br), National Water Agency ([ANA](www.ana.gov.br)), from R
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/lhmet/hidrowebdown}
+}
+
 }
 \author{
 \strong{Maintainer}: Jonatan Tatsch \email{jdtatsch@gmail.com}
