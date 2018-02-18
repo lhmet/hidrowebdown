@@ -15,7 +15,7 @@
 }
 
 # clean station attributes: code (Código), name (Nome) or river 
-.station_attr <- function(x, type = "Código"){
+.station_attr <- function(x, type = "Codigo"){
   
   info_char <- c("Codigo", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", 
                  "Municipio", "Operadora", "Responsavel", "Codigo Adicional")
@@ -98,10 +98,6 @@
   adren  <- x[grep("Drenagem", x) + 1] 
   if(verbose) print(adren)
   adren <- ifelse("-" %in% unlist(stringr::str_split(adren, "")), NA, as.numeric(adren))
-  
-  # info <- c("Código", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", "Município",
-  #   "Operadora", "Responsável", "Código Adicional")
-  #purrr::map(info, function(itype) .station_attr(x, type = itype))
 
   # dataframe com resultados
   stn_info <- data.frame(code = .station_attr(x, type = "Codigo"),
