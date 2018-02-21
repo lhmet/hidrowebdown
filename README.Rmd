@@ -30,7 +30,7 @@ devtools::install_github("lhmet/hidrowebdown")
 
 ## Example
 
-Find a hydrological station.
+You can choose a hydrological station looking at the data `hidro_metadata`.
 
 ```{r}
 library(hidrowebdown)
@@ -38,9 +38,13 @@ library(hidrowebdown)
 head(hidro_metadata)
 ```
 
-Get data.
+To download data, for some stations:
 
 ```{r}
-# hidroweb_import()
+stns <- c("42650000", "00252001")
+opts <- c("Vazao", "Chuva")
+ctl <- hidroweb_down(stations = stns, options = opts, 
+                     verbose = TRUE, dest.dir = "../", meta = TRUE)
+ctl
 ```
 
