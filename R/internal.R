@@ -17,6 +17,7 @@
 
 # clean station attributes: code (Código), name (Nome) or river ---------------
 .station_attr <- function(x, type = "Codigo") {
+  # type = "Codigo"
   info_char <- c(
     "Codigo", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado",
     "Municipio", "Operadora", "Responsavel", "Codigo Adicional"
@@ -24,7 +25,16 @@
   
   stopifnot(type %in% info_char)
   is_type <- stringr::str_detect(x, pattern = paste0(stringr::fixed(type), "$"))
-  stopifnot(length(which(is_type)) == 1)
+  
+  #  when station not found in database
+  if (!length(which(is_type)) == 1) {
+    station <- readr::parse_number(x[stringr::str_detect(x, pattern = "Estacao [0-9]{4,8}")])
+    msg <- gsub("</p>", "", gsub("<p class='aviso'>", "", x[length(x)]))
+    warning(" ", msg)
+    if (type == "Codigo") return(station)
+    return(NA_character_)
+  }
+  
   # take next row
   next_row <- x[which(is_type) + 1]
   res <- stringr::str_trim(next_row)
@@ -105,16 +115,28 @@ parse_options <- function(txt){
     option_sel[options_str %in% which_selected] <- TRUE
   } 
   
-  out_opts <- list(string = options_str, 
-                   number = options_num, 
-                   selected = option_sel)
+  out_opts <- tibble::tibble(option = options_str, 
+                             option_num = options_num, 
+                             selected = option_sel)
   return(out_opts)
 }
 
 # extract option ---------------------------------------------------------------
-.get_station_options <- function(x, verbose = FALSE) {
+.get_station_options <- function(cont, station) {
 
+  x <- readLines(textConnection(cont))
+  
   row_selector <- grep("Consultar serie de", x)
+  
+  # station cannot YET be found in the database
+  if (length(row_selector) == 0) {
+    warning("Station: ", station, " not found in database.")
+    out_opts <- tibble::tibble(option = NA_character_,
+                               option_num = NA, 
+                               select = FALSE)
+    return(out_opts)
+  }
+  
   x_bellow <- x[row_selector:length(x)]
   # detect options ------------------------------------------------------------
   pat <- "option.*value="
@@ -122,14 +144,14 @@ parse_options <- function(txt){
   #opt_detect <- stringr::str_detect(x, pattern = pat)
   # any option found!
   if (sum(!opt_detect) == 0) {
-    out_opts <- list(string = NA_character_,
-                     number = NA, 
-                     select = FALSE)
+    out_opts <- tibble::tibble(option = NA_character_,
+                               option_num = NA, 
+                               select = FALSE)
     return(out_opts)
   }
   
   # continue if there is any option --------------------------------------------
-  if (verbose) print(x_bellow[opt_detect])
+  #if (verbose) print(x_bellow[opt_detect])
   
   out_opts <- parse_options(x_bellow[opt_detect])
   
@@ -137,13 +159,17 @@ parse_options <- function(txt){
 }
 
 # extract metadata of sydrological stations -----------------------------------
-.extract_metadata <- function(cont, .verbose) {
+.extract_metadata <- function(cont) {
   
-  # cont <- hidroweb_cont
+  # cont <- hidroweb_cont; .verbose = TRUE
   x <- readLines(textConnection(cont))
+  
   x <- stringr::str_replace(x, "<td valign=\"top\">", "")
   x <- stringr::str_replace(x, "</td>", "")
   #closeAllConnections()
+  
+  # station code
+  stn <- .station_attr(x, type = "Codigo")
   
   # lon, lat, alt, area
   lon <- .coords_dec(x, type = "Longitude")
@@ -165,14 +191,14 @@ parse_options <- function(txt){
     adren <- readr::parse_number(adren)
   }
   
-  opts <- .get_station_options(x, .verbose)
+  #opts <- .get_station_options(x, stn, .verbose)
   
   # dataframe com resultados
   stn_info <- tibble::tibble(
-    station = .station_attr(x, type = "Codigo"),
-    options = opts$string,
-    cboTipoReg = opts$number,
-    selected = opts$select,
+    station = stn,
+    #options = opts$string,
+    #cboTipoReg = opts$number,
+    #selected = opts$select,
     lon = lon,
     lat = lat,
     alt = alt,
@@ -184,7 +210,7 @@ parse_options <- function(txt){
     basin = .station_attr(x, type = "Bacia"),
     subbasin = .station_attr(x, type = "Sub-bacia")
   )
-  stn_info <- tidyr::nest(stn_info, options, cboTipoReg, .key = "data_type")
+  #stn_info <- tidyr::nest(stn_info, options, cboTipoReg, .key = "data_type")
   # stn_info[["data_type"]]
   return(stn_info)
 }
@@ -244,6 +270,38 @@ parse_options <- function(txt){
 }
 
 
+# check if station was not found in database -----------------------------------
+.hidroweb_not_found_station <- function(cont){
+  # cont = hidroweb_cont
+  not_found <- stringr::str_detect(cont, "nao encontrada no banco de dados")
+  return(not_found)
+}
+
+# build template output with NAs -----------------------------------------------
+hidroweb_template <- function(.stn, .meta){
+  if (.meta) {
+    res <- tibble::tibble(station = .stn,
+                          lon = NA,
+                          lat = NA,
+                          alt = NA,
+                          area = NA,
+                          name = NA_character_,
+                          state = NA_character_,
+                          city = NA_character_,
+                          river = NA_character_,
+                          basin = NA_character_,
+                          subbasin = NA_character_,
+                          options = NA_character_,
+                          cboTipoReg = NA,
+                          file = NA_character_)
+    return(res)
+  }
+  res <- tibble::tibble(station = .stn,
+                        file = NA_character_)
+  return(res)
+}
+
+
 # dowload a station data file from hidroweb ------------------------------------
 .hydroweb_down_station <- function(station = "3253016"
                           , option = "Chuva"
@@ -262,7 +320,8 @@ parse_options <- function(txt){
   # station = "42751000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   # station = "00252001"; option = "Chuva"; verbose = TRUE; dest.dir = "../"
   # station = "02447049"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
-  # station = "36290000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
+  # 36458000, cadastrada mas sem dados
+  # station = "60473000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -274,19 +333,26 @@ parse_options <- function(txt){
   }
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
-  #if(metadata) 
-  hidroweb_meta <- .extract_metadata(hidroweb_cont, verbose)
-  # print(hidroweb_meta[["data_type"]][[1]])
-  
-  hidroweb_meta <- tidyr::unnest(hidroweb_meta)
-  
-  if (any(is.na(hidroweb_meta$options))) {
-    # no data file 
-    if (verbose) warning("No data was found for station ",
-                        station, ", option ", option,". \n")
-    hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = NA_character_)
-    return(hidroweb_meta)
+  # check if station is found in database -------------------------------------
+  hidroweb_not_found <- .hidroweb_not_found_station(hidroweb_cont)
+  if (hidroweb_not_found) {
+    # return template
+    tbl_template <- hidroweb_template(station, metadata)
+    return(tbl_template)
   }
+  
+  # option to POST request of data file
+  hidroweb_opts <- .get_station_options(hidroweb_cont, station)
+  hidroweb_opts_current <- dplyr::filter(hidroweb_opts, selected)
+  # PODE OCORRER DE  NAO TER NENHUMA SELECIONADA?
+  
+  # TO AQUI ----------
+  #if(metadata) 
+  hidroweb_meta <- .extract_metadata(hidroweb_cont)
+  # print(hidroweb_meta[["data_type"]][[1]])
+  #hidroweb_meta <- tidyr::unnest(hidroweb_meta)
+  
+
   
   # pode ocorrer da estação não ter a opção solicitada
   # verificar se a estacao tem a opcao
