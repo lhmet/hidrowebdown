@@ -186,11 +186,10 @@
 }
 
 
-# get hydroweb data for a station------------------------------------------------------------
+# get hydroweb data file address for a station---------------------------------
 #' @importFrom utils download.file 
-.hydro_data <- function(content, url, stn, dest.folder, verbose = TRUE){
+.hydroweb_file <- function(content){
   # content <- hidroweb_cont
-  # nova forma de obter sufixo para hidroweb_url
   content_split <- stringr::str_split(content, "href=")[[1]]
   position <- unlist(
     lapply(
@@ -201,48 +200,52 @@
     )
   )
   zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
-  
-  #Error in stringr::str_split(content_split[position], "\\.ZIP")[[1]] : 
-  #  subscript out of bounds
-  
-  # stringi::stri_unescape_unicode(zip_file_sufix)
   zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
-  
-  
-  if (! length(zip_file_sufix) > 0) {
-    if (verbose) message("No data found in hidroweb for the stn ",  stn ,". \n")
-    dest_file <- NA
-  }
-  # apenda zip file a url
-  file_url <-  file.path(dirname(url), zip_file_sufix)
+  return(zip_file_sufix)
+}
+
+
+# download hydroweb data file for a station------------------------------------
+.hydroweb_down_file <- function(.hidro_file, .station, .option, .dest.dir){
   # arquivo de destino
-  dest_file <- basename(file_url) 
-  dest_file <- gsub(zfile, paste0(dest.folder, stn, "_", option, ".zip"), dest_file)
-  utils::download.file(file_url, destfile = dest_file, mode = "wb")
-  
-  # messages
+  dest_file <-  paste0(station, "_", option, ".zip")
+  dest.dir <- normalizePath(.dest.dir)
+  dest_file <- file.path(dest.dir, dest_file)
+  utils::download.file(.hidro_file, destfile = dest_file, mode = "wb")
+  # check
   if (file.exists(dest_file)) {
-    if (verbose) message("File for stn ", stn, " saved.\n")
+    if (verbose) message("File saved in \n ", dest_file, "\n")
   } else {
-    if (verbose) warning("File for stn ", stn, " can not be saved.\n")
+    if (verbose) warning("Can not save file of  ", .station, ".\n")
   }
   return(dest_file)
-} 
+}
 
-
+# show more options when hydroweb have more than one data type per station-----
+.show_data_options <- function(.station, .metadata){
+  message("Station", .station, " also have data of: \n")
+  message(
+    paste(
+      dplyr::pull(
+        dplyr::select(.metadata, options)
+      ),
+      collapse = ", ")
+  )
+}
 
 
 # dowload a station data file from hidroweb ------------------------------------
-.get_hidroweb <- function(station = "3253016"
+.hydroweb_down_station <- function(station = "3253016"
                           , option = "Chuva"
                           , verbose = TRUE
-                          , dest.dir = "../"
-                          , only.info = FALSE) {
+                          , dest.dir = "../") {
   
   # station = "35275000"; option = "Cotas"; verbose = TRUE
   # station = "36020000"; option = "Vazoes"; verbose = TRUE
   # station = "03160001"; option = "Clima"; verbose = TRUE  # EMPTY
   # station = "02242067"; option = "Chuva"; verbose = TRUE
+  # station = "02242067"; option = "Clima"; verbose = TRUE
+  # station = "02352066" ; option = "Clima"; verbose = TRUE; dest.dir = "../"  # EMPTY
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
   b <- .get_cboTipoReg(option)
@@ -251,23 +254,33 @@
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
   hidroweb_meta <- .extract_metadata(hidroweb_cont)
-  hidroweb_meta[["data_type"]]
+  # print(hidroweb_meta[["data_type"]][[1]])
+  hidroweb_meta <- tidyr::unnest(hidroweb_meta)
   
-  if (!.nest) hidroweb_meta <- tidyr::unnest(hidroweb_meta)
+  if(is.na(hidroweb_meta$options)) {
+    if(verbose) warning("No data was found for station ", station, ". \n")
+    return(hidroweb_meta)
+  }
   
-  hidroweb_file <- 
-    
-    # hydrological data--------------- ----------------------------------------
-    dest_file <- .hydro_data(content = hidroweb_cont, 
-                             url = hidroweb_url, 
-                             stn = station, 
-                             dest.folder = dest.dir)
+  if (nrow(hidroweb_meta) > 1 & verbose) {
+    .show_data_options(station, hidroweb_meta)
+  }
+  
+  hidroweb_file <- .hydroweb_file(hidroweb_cont)
+  hidroweb_file <- file.path(dirname(hidroweb_url), hidroweb_file)
+  
+  hidroweb_down_file <- 
+    .hydroweb_down_file(hidroweb_file, station, option, dest.dir)
 
-  gc()
-  out <- transform(stn_info, file = dest_file)
-  return(out)
+  hidroweb_meta <- dplyr::filter(hidroweb_meta, options == option)
+  hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = hidroweb_down_file)
+  
+  #gc()
+  #closeAllConnections()
+  
+  return(hidroweb_meta)
 } # end download_file_hidroweb
 
 
-
-
+# test_p <- .hydroweb_down_station(station = "02243151" , option = "Chuva", verbose = TRUE, dest.dir = "../")
+test_c <- .hydroweb_down_station(station = "02352066" , option = "Clima", verbose = TRUE, dest.dir = "../")
