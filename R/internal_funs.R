@@ -149,6 +149,7 @@
   lat <- .coords_dec(x, type = "Latitude")
   
   alt <- gsub(",", ".", stringr::str_trim(x[grep("Altitude", x) + 1]))
+  if(length(alt) == 0) alt <- ""
   if (stringr::str_detect(alt, "-")) {
     alt <- NA
   } else {
@@ -156,6 +157,7 @@
   }  
   
   adren <- stringr::str_trim(x[grep("Drenagem", x) + 1])
+  if(length(adren) == 0) adren <- ""
   if (stringr::str_detect(adren, "-")) {
     adren <- NA
   } else {
@@ -199,6 +201,7 @@
       }
     )
   )
+  if(sum(position) < 1) return(NA_character_)
   zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
   zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
   return(zip_file_sufix)
@@ -206,31 +209,36 @@
 
 
 # download hydroweb data file for a station------------------------------------
-.hydroweb_down_file <- function(.hidro_file, .station, .option, .dest.dir){
+.hydroweb_down_file <- function(.hidro_file, 
+                                .station,
+                                .option,
+                                .dest.dir, 
+                                .verbose){
   # arquivo de destino
-  dest_file <-  paste0(station, "_", option, ".zip")
-  dest.dir <- normalizePath(.dest.dir)
-  dest_file <- file.path(dest.dir, dest_file)
-  utils::download.file(.hidro_file, destfile = dest_file, mode = "wb")
+  dest_file <-  paste0(.station, "_", .option, ".zip")
+  dest_dir <- normalizePath(.dest.dir)
+  dest_file <- file.path(dest_dir, dest_file)
+  utils::download.file(.hidro_file, dest_file, mode = "wb")
   # check
   if (file.exists(dest_file)) {
-    if (verbose) message("File saved in \n ", dest_file, "\n")
+    if (.verbose) message("File saved in \n ", dest_file, ".\n")
   } else {
-    if (verbose) warning("Can not save file of  ", .station, ".\n")
+    if (.verbose) warning("Cannot save file of  ", .station, ".\n")
   }
   return(dest_file)
 }
 
 # show more options when hydroweb have more than one data type per station-----
-.show_data_options <- function(.station, .metadata){
-  message("Station", .station, " also have data of: \n")
-  message(
-    paste(
-      dplyr::pull(
-        dplyr::select(.metadata, options)
-      ),
-      collapse = ", ")
-  )
+.show_data_options <- function(.station, .metadata, .option){
+  #other_opts <- dplyr::select(.metadata, options)
+  other_opts <- dplyr::filter(.metadata, 
+                              !str_detect(options, substr(.option, 1, 3))
+                              )
+  other_opts <- dplyr::pull(other_opts, options)
+    
+  #other_opts <- other_opts[charmatch(substr(.option, 1, 3), other_opts)]
+  message("Station: ", .station, " also have data of: ")
+  message(paste(other_opts, collapse = ", "),"\n")
 }
 
 
@@ -248,13 +256,17 @@
   # station = "02242067"; option = "Chuva"; verbose = TRUE
   # station = "02242067"; option = "Clima"; verbose = TRUE
   # station = "02352066" ; option = "Clima"; verbose = TRUE; dest.dir = "../"  # EMPTY
-  
+  # station = "42395000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
+  # station = "42751000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
   b <- .get_cboTipoReg(option)
   #zfile <- .get_zip_file(opt = option)
-
+  if(verbose) {
+    message("-----------------------------------------------\n",
+            "> ", station, ": ", option)
+  }
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
   hidroweb_meta <- .extract_metadata(hidroweb_cont)
@@ -262,32 +274,46 @@
   
   hidroweb_meta <- tidyr::unnest(hidroweb_meta)
   
-  if(is.na(hidroweb_meta$options)) {
+  if(any(is.na(hidroweb_meta$options))) {
     # no data file 
     if(verbose) warning("No data was found for station ", station, ". \n")
     hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = NA_character_)
     return(hidroweb_meta)
   }
   
-  if (nrow(hidroweb_meta) > 1 & verbose) {
+  # pode ocorrer da estação não ter a opção solicitada
+  # verificar se a estacao tem a opcao
+  if(!str_detect(hidroweb_meta$options, substr(option, 1, 3))){
+    hidroweb_meta <- dplyr::bind_rows(hidroweb_meta, hidroweb_meta)
+    hidroweb_meta$options[1] <- option
+    hidroweb_meta$cboTipoReg[1] <- NA_integer_
+  }
+  
+  if ((nrow(hidroweb_meta) > 1 ) & verbose) {
     # there is other data for this station
-    .show_data_options(station, hidroweb_meta)
+    .show_data_options(station, hidroweb_meta, option)
   }
   
   hidroweb_file <- .hydroweb_file(hidroweb_cont)
-  hidroweb_file <- file.path(dirname(hidroweb_url), hidroweb_file)
+  hidroweb_file <- ifelse(!is.na(hidroweb_file), 
+                          file.path(dirname(hidroweb_url), hidroweb_file),
+                          hidroweb_file
+                          )
   
-  hidroweb_down_file <- 
-    .hydroweb_down_file(hidroweb_file, station, option, dest.dir)
-
+  if(is.na(hidroweb_file)){
+    hidroweb_down_file <- hidroweb_file
+    if(verbose) warning("No data was found for station ", station, ". \n")
+  } else {
+    hidroweb_down_file<- .hydroweb_down_file(hidroweb_file, 
+                                             station, option, dest.dir, verbose)
+  }
+    
   hidroweb_meta <- dplyr::filter(hidroweb_meta, options == option)
   hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = hidroweb_down_file)
-  
-  #gc()
-  #closeAllConnections()
+
   if(!metadata) hidroweb_meta <- dplyr::select(hidroweb_meta, station, file)
   return(hidroweb_meta)
-} # end download_file_hidroweb
+} 
 
 
 # test_p <- .hydroweb_down_station(station = "02243151" , option = "Chuva", verbose = TRUE, dest.dir = "../")
