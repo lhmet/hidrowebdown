@@ -5,7 +5,8 @@ utils::globalVariables(c("verbose", "zfile", "option",
                          "MunicipioNome", "EstacaoNome",
                          "MunicipioCodigoIBGE", "EstadoCodigoIBGE",
                          "Sigla", "RioNome", "SubBaciaNome",
-                         "BaciaNome", "EstadoNome", "EstacaoCodigo"
+                         "BaciaNome", "EstadoNome", "EstacaoCodigo",
+                         "cboTipoReg", "options"
 ))
 
 
