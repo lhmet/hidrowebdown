@@ -276,7 +276,8 @@
   
   if(any(is.na(hidroweb_meta$options))) {
     # no data file 
-    if(verbose) warning("No data was found for station ", station, ". \n")
+    if(verbose) warning("No data was found for station ",
+                        station, ", option ", option,". \n")
     hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = NA_character_)
     return(hidroweb_meta)
   }
@@ -302,7 +303,8 @@
   
   if(is.na(hidroweb_file)){
     hidroweb_down_file <- hidroweb_file
-    if(verbose) warning("No data was found for station ", station, ". \n")
+    if(verbose) warning("No data was found for station ",
+                        station, ", option ", option,". \n")
   } else {
     hidroweb_down_file<- .hydroweb_down_file(hidroweb_file, 
                                              station, option, dest.dir, verbose)
