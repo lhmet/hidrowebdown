@@ -83,39 +83,61 @@
   return(HIDROWEB)
 }
 
-# extract option ---------------------------------------------------------------
-.get_station_options <- function(x) {
-  # pat <- "option  value="
-  row_selector <- grep("Consultar serie de", x)
-  x_bellow <- x[row_selector:length(x)]
-  
-  # detect options ------------------------------------------------------------
-  pat <- "option.*value="
-  opt_detect <- stringr::str_detect(x_bellow, pattern = pat)
-  # any option found!
-  all(!isTRUE(opt_detect)){
-    return(list(string = NA_character_, number = NA))
-  }
-  
-  # continue if there is any option --------------------------------------------
-  options <- x_bellow[opt_detect]
-  options_num <- as.integer(readr::parse_number(options))
+# parse options of data type---------------------------------------------------
+parse_options <- function(txt){
+  # txt = x_bellow
+  #options <- txt[opt_detect]
+  options_num <- as.integer(readr::parse_number(txt))
   stopifnot(options_num %in% c(8:14, 16))
   # extract options
   options_str <- unlist(
-    lapply(stringr::str_extract_all(options, "[A-Z]{1}[a-z]{2,40}"),
+    lapply(stringr::str_extract_all(txt, "[A-Z]{1}[a-z]{2,40}"),
            function(x){
              paste(x, collapse = " ")
            }
     )
   )
-  # names(options_num) <- options_str
-  # return(options_num)
-  return(list(string = options_str, number = options_num))
+  # selected option
+  which_selected <- options_str[grep("selected", txt)]
+  option_sel <- rep(FALSE, length(options_str))
+  
+  if (length(which_selected) > 0) {
+    option_sel[options_str %in% which_selected] <- TRUE
+  } 
+  
+  out_opts <- list(string = options_str, 
+                   number = options_num, 
+                   selected = option_sel)
+  return(out_opts)
+}
+
+# extract option ---------------------------------------------------------------
+.get_station_options <- function(x, verbose = FALSE) {
+
+  row_selector <- grep("Consultar serie de", x)
+  x_bellow <- x[row_selector:length(x)]
+  # detect options ------------------------------------------------------------
+  pat <- "option.*value="
+  opt_detect <- stringr::str_detect(x_bellow, pattern = pat)
+  #opt_detect <- stringr::str_detect(x, pattern = pat)
+  # any option found!
+  if (sum(!opt_detect) == 0) {
+    out_opts <- list(string = NA_character_,
+                     number = NA, 
+                     select = FALSE)
+    return(out_opts)
+  }
+  
+  # continue if there is any option --------------------------------------------
+  if (verbose) print(x_bellow[opt_detect])
+  
+  out_opts <- parse_options(x_bellow[opt_detect])
+  
+  return(out_opts)
 }
 
 # extract metadata of sydrological stations -----------------------------------
-.extract_metadata <- function(cont) {
+.extract_metadata <- function(cont, .verbose) {
   
   # cont <- hidroweb_cont
   x <- readLines(textConnection(cont))
@@ -143,13 +165,14 @@
     adren <- readr::parse_number(adren)
   }
   
-  opts <- .get_station_options(x)
+  opts <- .get_station_options(x, .verbose)
   
   # dataframe com resultados
   stn_info <- tibble::tibble(
     station = .station_attr(x, type = "Codigo"),
     options = opts$string,
     cboTipoReg = opts$number,
+    selected = opts$select,
     lon = lon,
     lat = lat,
     alt = alt,
@@ -239,7 +262,7 @@
   # station = "42751000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   # station = "00252001"; option = "Chuva"; verbose = TRUE; dest.dir = "../"
   # station = "02447049"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
-  # station = "02447026"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
+  # station = "36290000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -252,7 +275,7 @@
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
   #if(metadata) 
-  hidroweb_meta <- .extract_metadata(hidroweb_cont)
+  hidroweb_meta <- .extract_metadata(hidroweb_cont, verbose)
   # print(hidroweb_meta[["data_type"]][[1]])
   
   hidroweb_meta <- tidyr::unnest(hidroweb_meta)
