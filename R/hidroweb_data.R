@@ -9,10 +9,9 @@
 #' is saved.
 #' @param meta logical, if TRUE return information including station metadata. 
 #'
-#' @return
+#' @return tibble with information of dowloaded stations files.
 #' @export
 #'
-#' @examples
 hidroweb_down <- function(stations = "42450750",
                           options = "Chuva",
                           verbose = TRUE,
