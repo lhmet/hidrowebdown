@@ -142,7 +142,7 @@
   x <- readLines(textConnection(cont))
   x <- stringr::str_replace(x, "<td valign=\"top\">", "")
   x <- stringr::str_replace(x, "</td>", "")
-  closeAllConnections()
+  #closeAllConnections()
   
   # lon, lat, alt, area
   lon <- .coords_dec(x, type = "Longitude")
@@ -232,7 +232,7 @@
 .show_data_options <- function(.station, .metadata, .option){
   #other_opts <- dplyr::select(.metadata, options)
   other_opts <- dplyr::filter(.metadata, 
-                              !str_detect(options, substr(.option, 1, 3))
+                              !stringr::str_detect(options, substr(.option, 1, 3))
                               )
   other_opts <- dplyr::pull(other_opts, options)
     
@@ -285,7 +285,7 @@
   
   # pode ocorrer da estação não ter a opção solicitada
   # verificar se a estacao tem a opcao
-  if(!str_detect(hidroweb_meta$options, substr(option, 1, 3))){
+  if(!stringr::str_detect(hidroweb_meta$options, substr(option, 1, 3))){
     hidroweb_meta <- dplyr::bind_rows(hidroweb_meta, hidroweb_meta)
     hidroweb_meta$options[1] <- option
     hidroweb_meta$cboTipoReg[1] <- NA_integer_
@@ -312,7 +312,7 @@
   }
     
   hidroweb_meta <- dplyr::filter(hidroweb_meta, 
-                                 str_detect(options, substr(option, 1, 3))
+                                 stringr::str_detect(options, substr(option, 1, 3))
   )
   hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = hidroweb_down_file)
 
