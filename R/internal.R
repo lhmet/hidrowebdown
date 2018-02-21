@@ -126,10 +126,11 @@
     return(list(string = NA_character_, number = NA))
   }
   
-  # continue if there is any option
-  options <- x[opt_detect]
+  # continue if there is any option --------------------------------------------
+  options <- x_bellow[opt_detect]
   options_num <- as.integer(readr::parse_number(options))
   stopifnot(options_num %in% c(8:14, 16))
+  # extract options
   options_str <- unlist(
     lapply(stringr::str_extract_all(options, "[A-Z]{1}[a-z]{2,40}"),
            function(x){
@@ -156,7 +157,7 @@
   lat <- .coords_dec(x, type = "Latitude")
   
   alt <- gsub(",", ".", stringr::str_trim(x[grep("Altitude", x) + 1]))
-  if(length(alt) == 0) alt <- ""
+  if (length(alt) == 0) alt <- ""
   if (stringr::str_detect(alt, "-")) {
     alt <- NA
   } else {
@@ -164,7 +165,7 @@
   }  
   
   adren <- stringr::str_trim(x[grep("Drenagem", x) + 1])
-  if(length(adren) == 0) adren <- ""
+  if (length(adren) == 0) adren <- ""
   if (stringr::str_detect(adren, "-")) {
     adren <- NA
   } else {
@@ -208,7 +209,7 @@
       }
     )
   )
-  if(sum(position) < 1) return(NA_character_)
+  if (sum(position) < 1) return(NA_character_)
   zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
   zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
   return(zip_file_sufix)
@@ -272,7 +273,7 @@
     # form to POST
   b <- .get_cboTipoReg(option)
   #zfile <- .get_zip_file(opt = option)
-  if(verbose) {
+  if (verbose) {
     message("-----------------------------------------------\n",
             "> ", station, ": ", option)
   }
@@ -284,9 +285,9 @@
   
   hidroweb_meta <- tidyr::unnest(hidroweb_meta)
   
-  if(any(is.na(hidroweb_meta$options))) {
+  if (any(is.na(hidroweb_meta$options))) {
     # no data file 
-    if(verbose) warning("No data was found for station ",
+    if (verbose) warning("No data was found for station ",
                         station, ", option ", option,". \n")
     hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = NA_character_)
     return(hidroweb_meta)
@@ -294,7 +295,7 @@
   
   # pode ocorrer da estação não ter a opção solicitada
   # verificar se a estacao tem a opcao
-  if(!stringr::str_detect(hidroweb_meta$options, substr(option, 1, 3))){
+  if (!stringr::str_detect(hidroweb_meta$options, substr(option, 1, 3))) {
     hidroweb_meta <- dplyr::bind_rows(hidroweb_meta, hidroweb_meta)
     hidroweb_meta$options[1] <- option
     hidroweb_meta$cboTipoReg[1] <- NA_integer_
