@@ -43,7 +43,7 @@
 #' comments(hidro_metadata)
 #' }
 #'
-hidroweb_meta <- function() {
+hidroweb_metadata_live <- function() {
   
   # file of stations metadata --------------------------------------------------
   survey_url_file <-
