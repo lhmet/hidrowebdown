@@ -52,35 +52,6 @@
   return(sel_value_l)
 }
 
-# get zip file according to the given option ----------------------------------
-.get_zip_file <- function(opt) {
-
-  # check user input
-  stopifnot(
-    opt %in% c(
-      "Cota", "Vazao", "Chuva",
-      "Qualidade", "Resumo", "Sedimento",
-      "Perfil"
-    ),
-    length(opt) == 1,
-    is.character(opt)
-  )
-
-  switch(opt
-    , Cota = "COTAS.ZIP"
-    , Cotas = "COTAS.ZIP"
-    , Vazao = "VAZOES.ZIP"
-    , Vazoes = "VAZOES.ZIP"
-    , Chuva = "CHUVAS.ZIP"
-    , Chuvas = "CHUVAS.ZIP"
-    , Clima = "CLIMA.ZIP"
-    , Qualidade = "QUALAGUA.ZIP"
-    , Resumo = "RESUMODESC.ZIP"
-    , Sedimento = "SEDIMENTOS.ZIP"
-    , Sedimentos = "SEDIMENTOS.ZIP"
-    , Perfil = "PERFIL.ZIP"
-  )
-}
 
 
 # get hidroweb url for a station ----------------------------------------------
@@ -268,6 +239,7 @@
   # station = "42751000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   # station = "00252001"; option = "Chuva"; verbose = TRUE; dest.dir = "../"
   # station = "02447049"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
+  # station = "02447026"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -280,7 +252,7 @@
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
   #if(metadata) 
-    hidroweb_meta <- .extract_metadata(hidroweb_cont)
+  hidroweb_meta <- .extract_metadata(hidroweb_cont)
   # print(hidroweb_meta[["data_type"]][[1]])
   
   hidroweb_meta <- tidyr::unnest(hidroweb_meta)
