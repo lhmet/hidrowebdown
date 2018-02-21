@@ -188,6 +188,89 @@
   return(hidroweb_url)
 }
 
+# get station content from hidroweb page---------------------------------------
+.hidroweb_post <- function(.url, .b, .verbose = TRUE){
+  
+  # take time of request ------------------------------------------------------
+  st <- system.time(
+    HIDROWEB <-  httr::POST(.url, body = .b, encode = "form")
+  )
+  if(.verbose) print(st["elapsed"])
+  
+  HIDROWEB <- httr::content(HIDROWEB, as = "text", encoding = "ISO-8859-1")
+  HIDROWEB <- no_accent(HIDROWEB)
+  return(HIDROWEB)
+}
+
+# extract option ---------------------------------------------------------------
+.get_station_options <- function(x) {
+  pat <- "option  value="
+  options <- x[stringr::str_detect(x, pattern = pat)]
+  options_num <- as.integer(readr::parse_number(options))
+  stopifnot(options_num %in% c(8:14, 16))
+  options_str <- unlist(
+    lapply(stringr::str_extract_all(options, "[A-Z]{1}[a-z]{2,40}"),
+           function(x){
+             paste(x, collapse = " ")
+           }
+    )
+  )
+  # names(options_num) <- options_str
+  # return(options_num)
+  return(list(string = options_str, number = options_num))
+}
+
+# extract metadata of sydrological stations -----------------------------------
+.extract_metadata <- function(cont) {
+  
+  # cont <- hidroweb_cont
+  x <- readLines(textConnection(cont))
+  x <- stringr::str_replace(x, "<td valign=\"top\">", "")
+  x <- stringr::str_replace(x, "</td>", "")
+  closeAllConnections()
+  
+  # lon, lat, alt, area
+  lon <- .coords_dec(x, type = "Longitude")
+  lat <- .coords_dec(x, type = "Latitude")
+  
+  alt <- gsub(",", ".", stringr::str_trim(x[grep("Altitude", x) + 1]))
+  if (stringr::str_detect(alt, "-")) {
+    alt <- NA
+  } else {
+    alt <- readr::parse_number(alt)
+  }  
+  
+  adren <- stringr::str_trim(x[grep("Drenagem", x) + 1])
+  if (stringr::str_detect(adren, "-")) {
+    adren <- NA
+  } else {
+    adren <- readr::parse_number(adren)
+  }
+  
+  opts <- .get_station_options(x)
+  
+  # dataframe com resultados
+  stn_info <- tibble::tibble(
+    station = .station_attr(x, type = "Codigo"),
+    options = opts$string,
+    cboTipoReg = opts$number,
+    lon = lon,
+    lat = lat,
+    alt = alt,
+    area = adren,
+    name = .station_attr(x, type = "Nome"),
+    state = .station_attr(x, type = "Estado"),
+    city = .station_attr(x, type = "Municipio"),
+    river = .station_attr(x, type = "Rio"),
+    basin = .station_attr(x, type = "Bacia"),
+    subbasin = .station_attr(x, type = "Sub-bacia")
+  )
+  stn_info <- tidyr::nest(stn_info, options, cboTipoReg, .key = "data_type")
+  # stn_info[["data_type"]]
+  return(stn_info)
+}
+
+
 
 
 # dowload a station data file from hidroweb ------------------------------------
@@ -197,16 +280,22 @@
                           , dest.dir = "../"
                           , only.info = FALSE) {
   
-  # station = "35275000"; option = "Vazoes"
+  # station = "35275000"; option = "Cotas"; verbose = TRUE
+  # station = "36020000"; option = "Vazoes"; verbose = TRUE
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
   b <- .get_cboTipoReg(option)
   #zfile <- .get_zip_file(opt = option)
 
-  # take time of request ------------------------------------------------------
-  st <- system.time(
-    r <-  httr::POST(url = hidroweb_url, body = b, encode = "form")
-  )
+  hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
+  
+  meta <- .extract_metadata(hidroweb_cont)
+
+  if (only.options) meta <- dplyr::select(meta, station, options, cboTipoReg)
+  if (!.nest) meta <- tidyr::unnest(meta)
+  
+  
+  
 
   if (httr::status_code(r) != 200) {
     stop("\nThe Hidroweb website does not appear to be responding.\n",
