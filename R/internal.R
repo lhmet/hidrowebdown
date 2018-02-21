@@ -114,13 +114,20 @@
 
 # extract option ---------------------------------------------------------------
 .get_station_options <- function(x) {
-  #pat <- "option  value="
+  # pat <- "option  value="
+  row_selector <- grep("Consultar serie de", x)
+  x_bellow <- x[row_selector:length(x)]
+  
+  # detect options ------------------------------------------------------------
   pat <- "option.*value="
-  options <- x[stringr::str_detect(x, pattern = pat)]
-  if (length(options) == 0){
-    # not found any option!
+  opt_detect <- stringr::str_detect(x_bellow, pattern = pat)
+  # any option found!
+  all(!isTRUE(opt_detect)){
     return(list(string = NA_character_, number = NA))
   }
+  
+  # continue if there is any option
+  options <- x[opt_detect]
   options_num <- as.integer(readr::parse_number(options))
   stopifnot(options_num %in% c(8:14, 16))
   options_str <- unlist(
@@ -250,15 +257,16 @@
                           , verbose = TRUE
                           ) {
   
-  # station = "35275000"; option = "Cotas"; verbose = TRUE
+  # station = "35275000"; option = "Cotas"; verbose = TRUE; metadata = TRUE
   # station = "36020000"; option = "Vazoes"; verbose = TRUE
-  # station = "03160001"; option = "Clima"; verbose = TRUE  # EMPTY
+  # station = "03160001"; option = "Clima"; verbose = TRUE; metadata = TRUE  # EMPTY
   # station = "02242067"; option = "Chuva"; verbose = TRUE
   # station = "02242067"; option = "Clima"; verbose = TRUE
   # station = "02352066" ; option = "Clima"; verbose = TRUE; dest.dir = "../"  # EMPTY
   # station = "42395000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   # station = "42751000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   # station = "00252001"; option = "Chuva"; verbose = TRUE; dest.dir = "../"
+  # station = "02447049"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -270,7 +278,8 @@
   }
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
-  hidroweb_meta <- .extract_metadata(hidroweb_cont)
+  #if(metadata) 
+    hidroweb_meta <- .extract_metadata(hidroweb_cont)
   # print(hidroweb_meta[["data_type"]][[1]])
   
   hidroweb_meta <- tidyr::unnest(hidroweb_meta)
@@ -323,3 +332,14 @@
 
 # test_p <- .hydroweb_down_station(station = "02243151" , option = "Chuva", verbose = TRUE, dest.dir = "../")
 # test_c <- .hydroweb_down_station(station = "02352066" , option = "Clima", verbose = TRUE, dest.dir = "../")
+
+
+# > 02447049: Clima
+# elapsed 
+# 120.934 
+# Error: length(which(is_type)) == 1 is not TRUE
+# In addition: Warning message:
+# In if (!stringr::str_detect(hidroweb_meta$options, substr(option,  :
+# Show Traceback
+# Rerun with Debug
+# Error: length(which(is_type)) == 1 is not TRUE 
