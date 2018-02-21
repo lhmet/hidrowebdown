@@ -22,7 +22,9 @@ Imports:
     stringr (>= 1.2.0),
     tibble (>= 1.4.2),
     xml2 (>= 1.2.0),
-    rlang (>= 0.1.6)
+    rlang (>= 0.1.6),
+    tidyr (>= 0.8.0),
+    readr (>= 1.1.1.9000)
 ByteCompile: true
 Encoding: UTF-8
 LazyData: true
