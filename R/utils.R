@@ -6,8 +6,11 @@ utils::globalVariables(c("verbose", "zfile", "option",
                          "MunicipioCodigoIBGE", "EstadoCodigoIBGE",
                          "Sigla", "RioNome", "SubBaciaNome",
                          "BaciaNome", "EstadoNome", "EstacaoCodigo"
-                         ))
+))
 
 
-# function to deal with accents
+# handling special characters e.g. accents in R--------------------------------
 no_accent <- function(x) stringi::stri_trans_general(x, "latin-ascii")
+
+# function to collapse string --------------------------------------------------
+str_collapse <- function(x, by = "-") paste(x, collapse = by)
