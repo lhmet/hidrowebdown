@@ -1,17 +1,34 @@
-# hidroweb_down <- function(code,
-#                           data.type = c(
-#                             "Cota", "Vazao", "Chuva",
-#                             "Qualidade", "Resumo", "Sedimento",
-#                             "Perfil"
-#                           ),
-#                           verbose,
-#                           dest.dir = "../",
-#                           ){
-#   # change args names, expand.grid, check inputs
-#   purrr::map_df(id, ~.get_hidroweb(.x, 
-#                                    option = data.type,
-#                                    .verbose = verbose,
-#                                    .dest.dir = dest.dir
-#                                    )
-#                 )
-# }
+
+hidroweb_down <- function(stations = "42450750",
+                          options = "Chuva",
+                          verbose = TRUE,
+                          dest.dir = "./",
+                          meta = TRUE) {
+
+  # check inputs
+
+  # options and stn combinations
+  arg_combs <- expand.grid(options, stations, stringsAsFactors = FALSE)
+  arg_combs <- setNames(arg_combs, nm = c("options", "stations"))
+  stns_l <- arg_combs$stations
+  opts_l <- arg_combs$options
+  
+  purrr::map2_df(
+    stns_l, opts_l,
+    ~.hydroweb_down_station(
+      .x,
+      .y,
+      dest.dir,
+      verbose,
+      metadata = meta
+    )
+  )
+}
+
+# Vazao "42600000"
+stns <- c("42751000")
+opts <- c("Vazoes", "Cotas")
+x <- hidroweb_down(stations = stns, options = opts, 
+                   verbose = TRUE, dest.dir = "../", meta = TRUE)
+
+
