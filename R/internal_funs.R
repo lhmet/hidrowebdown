@@ -258,6 +258,7 @@
   # station = "02352066" ; option = "Clima"; verbose = TRUE; dest.dir = "../"  # EMPTY
   # station = "42395000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
   # station = "42751000"; option = "Vazoes"; verbose = TRUE; dest.dir = "../"
+  # station = "00252001"; option = "Chuva"; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -310,7 +311,9 @@
                                              station, option, dest.dir, verbose)
   }
     
-  hidroweb_meta <- dplyr::filter(hidroweb_meta, options == option)
+  hidroweb_meta <- dplyr::filter(hidroweb_meta, 
+                                 str_detect(options, substr(option, 1, 3))
+  )
   hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = hidroweb_down_file)
 
   if(!metadata) hidroweb_meta <- dplyr::select(hidroweb_meta, station, file)

@@ -45,8 +45,8 @@ hidroweb_down <- function(stations = "42450750",
 #x <- hidroweb_down(stations = stns, options = opts, 
 #                   verbose = TRUE, dest.dir = "../", meta = TRUE)
 
-stns <- c("42650000", "00252001")
-opts <- c("Vazao", "Chuva")
-ctl <- hidroweb_down(stations = stns, options = opts, 
-                     verbose = TRUE, dest.dir = "../", meta = TRUE)
-ctl
+# stns <- c("42650000", "00252001")
+# opts <- c("Vazao", "Chuva")
+# ctl <- hidroweb_down(stations = stns, options = opts, 
+#                      verbose = TRUE, dest.dir = "../", meta = TRUE)
+# ctl
