@@ -39,12 +39,16 @@
 .get_cboTipoReg <- function(option = "Chuva"){
   
   cboTipoReg_values <- c("Cota" = 8
+                         ,"Cotas" = 8
                          ,"Vazao" = 9
+                         ,"Vazoes" = 9
                          ,"Chuva" = 10
+                         ,"Chuvas" = 10
                          ,"Clima" = 11
                          ,"Qualidade" = 12
                          ,"Resumo" = 13
                          ,"Sedimento" = 14
+                         ,"Sedimentos" = 14
                          ,"Perfil" = 16)
   
   stopifnot(option %in% names(cboTipoReg_values))
@@ -68,12 +72,16 @@
 
   switch(opt
     , Cota = "COTAS.ZIP"
+    , Cotas = "COTAS.ZIP"
     , Vazao = "VAZOES.ZIP"
+    , Vazoes = "VAZOES.ZIP"
     , Chuva = "CHUVAS.ZIP"
+    , Chuvas = "CHUVAS.ZIP"
     , Clima = "CLIMA.ZIP"
     , Qualidade = "QUALAGUA.ZIP"
     , Resumo = "RESUMODESC.ZIP"
     , Sedimento = "SEDIMENTOS.ZIP"
+    , Sedimentos = "SEDIMENTOS.ZIP"
     , Perfil = "PERFIL.ZIP"
   )
 }
@@ -160,6 +168,28 @@
 } 
 
 
+
+
+
+
+
+# get hidroweb url for a station ----------------------------------------------
+.hidroweb_url <- function(.station_code) {
+  # .station_code = "3253005"
+  hidroweb_url <- 
+    "http://hidroweb.ana.gov.br/Estacao.asp?Codigo=XXXXXXXX&CriaArq=true&TipoArq=1"
+  # hidroweb_url <- "http://hidroweb.ana.gov.br/Estacao.asp?Codigo=XXXXXXXX"
+  hidroweb_url <- stringr::str_replace(
+    hidroweb_url,
+    "XXXXXXXX",
+    as.character(.station_code)
+  )
+  #.check_response(hidroweb_url)
+  return(hidroweb_url)
+}
+
+
+
 # dowload a station data file from hidroweb ------------------------------------
 .get_hidroweb <- function(station = "3253016"
                           , option = "Chuva"
@@ -167,25 +197,22 @@
                           , dest.dir = "../"
                           , only.info = FALSE) {
   
-  hidroweb_url <- "http://hidroweb.ana.gov.br/Estacao.asp?Codigo=XXXXXXXX&CriaArq=true&TipoArq=1"
-  hidroweb_url <- stringr::str_replace(hidroweb_url, 
-                                       "XXXXXXXX", 
-                                       as.character(station)
-  )
-  # form to POST
-  option_num_l <- .get_cboTipoReg(option)
-  zfile <- .get_zip_file(opt = option)
+  # station = "35275000"; option = "Vazoes"
+  hidroweb_url <- .hidroweb_url(station)
+    # form to POST
+  b <- .get_cboTipoReg(option)
+  #zfile <- .get_zip_file(opt = option)
 
-  # request
-  #cat("POST", "\n")
-  r <-  httr::POST(hidroweb_url, body = option_num_l, encode = "form")
+  # take time of request ------------------------------------------------------
+  st <- system.time(
+    r <-  httr::POST(url = hidroweb_url, body = b, encode = "form")
+  )
 
   if (httr::status_code(r) != 200) {
     stop("\nThe Hidroweb website does not appear to be responding.\n",
                                           "Please try again later.\n")
   }
-    #cont <- base::rawToChar(r$content) 
-    #base::Encoding(cont) <- "latin1"
+
     cont <- httr::content(r, as = "text", encoding = "latin1")
     cont <- no_accent(cont)
     # writeLines(cont); cont <- httr::content(r, encoding = "latin1")
