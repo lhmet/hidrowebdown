@@ -237,8 +237,10 @@
 # dowload a station data file from hidroweb ------------------------------------
 .hydroweb_down_station <- function(station = "3253016"
                           , option = "Chuva"
+                          , dest.dir = "../"
+                          , metadata = TRUE
                           , verbose = TRUE
-                          , dest.dir = "../") {
+                          ) {
   
   # station = "35275000"; option = "Cotas"; verbose = TRUE
   # station = "36020000"; option = "Vazoes"; verbose = TRUE
@@ -246,6 +248,8 @@
   # station = "02242067"; option = "Chuva"; verbose = TRUE
   # station = "02242067"; option = "Clima"; verbose = TRUE
   # station = "02352066" ; option = "Clima"; verbose = TRUE; dest.dir = "../"  # EMPTY
+  
+  station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
   b <- .get_cboTipoReg(option)
@@ -255,14 +259,18 @@
   
   hidroweb_meta <- .extract_metadata(hidroweb_cont)
   # print(hidroweb_meta[["data_type"]][[1]])
+  
   hidroweb_meta <- tidyr::unnest(hidroweb_meta)
   
   if(is.na(hidroweb_meta$options)) {
+    # no data file 
     if(verbose) warning("No data was found for station ", station, ". \n")
+    hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = NA_character_)
     return(hidroweb_meta)
   }
   
   if (nrow(hidroweb_meta) > 1 & verbose) {
+    # there is other data for this station
     .show_data_options(station, hidroweb_meta)
   }
   
@@ -277,7 +285,7 @@
   
   #gc()
   #closeAllConnections()
-  
+  if(!metadata) hidroweb_meta <- dplyr::select(hidroweb_meta, station, file)
   return(hidroweb_meta)
 } # end download_file_hidroweb
 
