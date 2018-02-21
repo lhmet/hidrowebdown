@@ -1,40 +1,36 @@
 
 # parse lon or lat to decimal----------------------- --------------------------
-.coords_dec <- function(x, type = "Longitude"){
+.coords_dec <- function(x, type = "Longitude") {
   coord <- as.numeric(
     unlist(
       stringr::str_split(
         stringr::str_trim(x[grep(type, x) + 1])
-        , ":")
+        , ":"
+      )
     )
   )
   
   coord_sinal <- sign(coord[1])
-  coord <-  round(sum(abs(coord)/c(1, 60, 3600)) * (coord_sinal), 7)
+  coord <- round(sum(abs(coord) / c(1, 60, 3600)) * (coord_sinal), 7)
   return(coord)
 }
 
-# clean station attributes: code (Código), name (Nome) or river 
-.station_attr <- function(x, type = "Codigo"){
-  
-  info_char <- c("Codigo", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado", 
-                 "Municipio", "Operadora", "Responsavel", "Codigo Adicional")
+# clean station attributes: code (Código), name (Nome) or river ---------------
+.station_attr <- function(x, type = "Codigo") {
+  info_char <- c(
+    "Codigo", "Nome", "Rio", "Bacia", "Sub-bacia", "Estado",
+    "Municipio", "Operadora", "Responsavel", "Codigo Adicional"
+  )
   
   stopifnot(type %in% info_char)
-  
-  res <- stringr::str_trim(
-    x[
-      which(
-        stringr::str_detect(x, 
-                            stringr::fixed(type)
-        )
-      )[1] + 1
-      ]
-  )
+  is_type <- stringr::str_detect(x, pattern = paste0(stringr::fixed(type), "$"))
+  stopifnot(length(which(is_type)) == 1)
+  # take next row
+  next_row <- x[which(is_type) + 1]
+  res <- stringr::str_trim(next_row)
   res[res == "-"] <- NA_character_
   return(res)
 }
-
 # Set cboTipoReg value according to option selected  --------------------------
 .get_cboTipoReg <- function(option = "Chuva"){
   
@@ -87,92 +83,6 @@
 }
 
 
-# extract metadata of sydrological stations -----------------------------------
-.extract_metadata <- function(cont, verbose = FALSE){
-
-  x <- readLines(textConnection(cont))
-  x <-stringr::str_replace(x, "<td valign=\"top\">", "") 
-  x <- stringr::str_replace(x, "</td>", "")
-  closeAllConnections()
-  
-  # lon, lat, alt, area
-  lon <- .coords_dec(x, type = "Longitude")
-  lat <- .coords_dec(x, type = "Latitude")
-  
-  alt  <- gsub(",", ".", x[grep("Altitude", x) + 1])
-  if(verbose) print(alt)
-  alt <- ifelse("-" %in% unlist(stringr::str_split(alt, "")), NA, as.numeric(alt))
-  
-  adren  <- x[grep("Drenagem", x) + 1] 
-  if(verbose) print(adren)
-  adren <- ifelse("-" %in% unlist(stringr::str_split(adren, "")), NA, as.numeric(adren))
-
-  # dataframe com resultados
-  stn_info <- data.frame(code = .station_attr(x, type = "Codigo"),
-                         lon = lon,
-                         lat = lat,
-                         alt = alt,
-                         area = adren, 
-                         name = .station_attr(x, type = "Nome"),
-                         state = .station_attr(x, type = "Estado"),
-                         city = .station_attr(x, type = "Municipio"),
-                         river = .station_attr(x, type = "Rio"),
-                         basin = .station_attr(x, type = "Bacia"),
-                         subbasin = .station_attr(x, type = "Sub-bacia"),
-                         stringsAsFactors = FALSE)
-  return(stn_info)
-}
-
-
-# get hydroweb data for a station------------------------------------------------------------
-#' @importFrom utils download.file 
-.hydro_data <- function(content, url, stn, dest.folder, verbose = TRUE){
-  # cont <- content
-  # nova forma de obter sufixo para hidroweb_url
-  content_split <- stringr::str_split(content, "href=")[[1]]
-  position <- unlist(
-    lapply(
-      content_split,
-      function(x) {
-        stringr::str_detect(x, "ARQ.*ZIP")
-      }
-    )
-  )
-  zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
-  
-  #Error in stringr::str_split(content_split[position], "\\.ZIP")[[1]] : 
-  #  subscript out of bounds
-  
-  # stringi::stri_unescape_unicode(zip_file_sufix)
-  zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
-  
-  
-  if (! length(zip_file_sufix) > 0) {
-    if (verbose) message("No data found in hidroweb for the stn ",  stn ,". \n")
-    dest_file <- NA
-  }
-  # apenda zip file a url
-  file_url <-  file.path(dirname(url), zip_file_sufix)
-  # arquivo de destino
-  dest_file <- basename(file_url) 
-  dest_file <- gsub(zfile, paste0(dest.folder, stn, "_", option, ".zip"), dest_file)
-  utils::download.file(file_url, destfile = dest_file, mode = "wb")
-  
-  # messages
-  if (file.exists(dest_file)) {
-    if (verbose) message("File for stn ", stn, " saved.\n")
-  } else {
-    if (verbose) warning("File for stn ", stn, " can not be saved.\n")
-  }
-  return(dest_file)
-} 
-
-
-
-
-
-
-
 # get hidroweb url for a station ----------------------------------------------
 .hidroweb_url <- function(.station_code) {
   # .station_code = "3253005"
@@ -204,8 +114,13 @@
 
 # extract option ---------------------------------------------------------------
 .get_station_options <- function(x) {
-  pat <- "option  value="
+  #pat <- "option  value="
+  pat <- "option.*value="
   options <- x[stringr::str_detect(x, pattern = pat)]
+  if (length(options) == 0){
+    # not found any option!
+    return(list(string = NA_character_, number = NA))
+  }
   options_num <- as.integer(readr::parse_number(options))
   stopifnot(options_num %in% c(8:14, 16))
   options_str <- unlist(
@@ -271,6 +186,50 @@
 }
 
 
+# get hydroweb data for a station------------------------------------------------------------
+#' @importFrom utils download.file 
+.hydro_data <- function(content, url, stn, dest.folder, verbose = TRUE){
+  # content <- hidroweb_cont
+  # nova forma de obter sufixo para hidroweb_url
+  content_split <- stringr::str_split(content, "href=")[[1]]
+  position <- unlist(
+    lapply(
+      content_split,
+      function(x) {
+        stringr::str_detect(x, "ARQ.*ZIP")
+      }
+    )
+  )
+  zip_file_sufix <- stringr::str_split(content_split[position], "\\.ZIP")[[1]][1]
+  
+  #Error in stringr::str_split(content_split[position], "\\.ZIP")[[1]] : 
+  #  subscript out of bounds
+  
+  # stringi::stri_unescape_unicode(zip_file_sufix)
+  zip_file_sufix <- paste0(gsub('\\"', "", zip_file_sufix), ".ZIP")
+  
+  
+  if (! length(zip_file_sufix) > 0) {
+    if (verbose) message("No data found in hidroweb for the stn ",  stn ,". \n")
+    dest_file <- NA
+  }
+  # apenda zip file a url
+  file_url <-  file.path(dirname(url), zip_file_sufix)
+  # arquivo de destino
+  dest_file <- basename(file_url) 
+  dest_file <- gsub(zfile, paste0(dest.folder, stn, "_", option, ".zip"), dest_file)
+  utils::download.file(file_url, destfile = dest_file, mode = "wb")
+  
+  # messages
+  if (file.exists(dest_file)) {
+    if (verbose) message("File for stn ", stn, " saved.\n")
+  } else {
+    if (verbose) warning("File for stn ", stn, " can not be saved.\n")
+  }
+  return(dest_file)
+} 
+
+
 
 
 # dowload a station data file from hidroweb ------------------------------------
@@ -282,6 +241,8 @@
   
   # station = "35275000"; option = "Cotas"; verbose = TRUE
   # station = "36020000"; option = "Vazoes"; verbose = TRUE
+  # station = "03160001"; option = "Clima"; verbose = TRUE  # EMPTY
+  # station = "02242067"; option = "Chuva"; verbose = TRUE
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
   b <- .get_cboTipoReg(option)
@@ -289,30 +250,15 @@
 
   hidroweb_cont <- .hidroweb_post(hidroweb_url, b, verbose)
   
-  meta <- .extract_metadata(hidroweb_cont)
-
-  if (only.options) meta <- dplyr::select(meta, station, options, cboTipoReg)
-  if (!.nest) meta <- tidyr::unnest(meta)
+  hidroweb_meta <- .extract_metadata(hidroweb_cont)
+  hidroweb_meta[["data_type"]]
   
+  if (!.nest) hidroweb_meta <- tidyr::unnest(hidroweb_meta)
   
-  
-
-  if (httr::status_code(r) != 200) {
-    stop("\nThe Hidroweb website does not appear to be responding.\n",
-                                          "Please try again later.\n")
-  }
-
-    cont <- httr::content(r, as = "text", encoding = "latin1")
-    cont <- no_accent(cont)
-    # writeLines(cont); cont <- httr::content(r, encoding = "latin1")
-    
-    # station coordinates and metadata ----------------------------------------
-    #cat("metadata", "\n")
-    stn_info <- .extract_metadata(cont)
-    if (only.info) return(stn_info)
+  hidroweb_file <- 
     
     # hydrological data--------------- ----------------------------------------
-    dest_file <- .hydro_data(content = cont, 
+    dest_file <- .hydro_data(content = hidroweb_cont, 
                              url = hidroweb_url, 
                              stn = station, 
                              dest.folder = dest.dir)
