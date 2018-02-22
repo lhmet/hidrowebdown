@@ -279,7 +279,7 @@ hidroweb_template <- function(.stn, .meta){
   if (.meta) {
     res <- tibble::tibble(station = .stn,
                           option = NA,
-                          file = NA
+                          file = NA,
                           lon = NA,
                           lat = NA,
                           alt = NA,
