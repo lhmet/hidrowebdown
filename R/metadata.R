@@ -144,7 +144,7 @@ hidroweb_metadata_live <- function() {
   
 
   comment(m) <- paste0(
-    "Updated on Hidroweb in:",
+    "Last update on Hidroweb in: ",
     .last_update_metadata()
   )
   return(tibble::as_tibble(m))
