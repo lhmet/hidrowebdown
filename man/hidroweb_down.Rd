@@ -2,16 +2,20 @@
 % Please edit documentation in R/hidroweb.R
 \name{hidroweb_down}
 \alias{hidroweb_down}
-\title{Download station data files from Hidroweb}
+\title{Download station data files from Hidroweb database}
 \usage{
-hidroweb_down(stations = "42450750", options = "Chuva", verbose = TRUE,
-  dest.dir = "./", meta = TRUE)
+hidroweb_down(stations = "42450750", options = "Chuva", combo = TRUE,
+  verbose = TRUE, dest.dir = "./", meta = TRUE)
 }
 \arguments{
 \item{stations}{character vector with code of stations}
 
 \item{options}{character vector with one or more options: "Cota", "Vazao",
 "Chuva", "Qualidade", "Resumo", "Sedimento", "Perfil".}
+
+\item{combo}{Logical, if TRUE a unique combination of all elements of 
+stations and options is used. Otherwise, donwload is executed to each
+station-option pair.}
 
 \item{verbose}{logical. if TRUE R report extra information on progress.}
 
@@ -21,8 +25,8 @@ is saved.}
 \item{meta}{logical, if TRUE return information including station metadata.}
 }
 \value{
-tibble with information of dowloaded stations files.
+a \code{tibble} with information of downloaded stations files.
 }
 \description{
-Download station data files from Hidroweb
+Download station data files from Hidroweb database
 }

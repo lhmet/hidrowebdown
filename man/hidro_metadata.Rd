@@ -9,7 +9,7 @@
 \item{Codigo}{station code ID}
 \item{Longitude}{ in decimal degrees}
 \item{Latitude}{in decimal degrees}
-\item{Altitude}{masl}
+\item{Altitude}{m.a.s.l}
 \item{AreaDrenagem}{Drainage area, Km2}
 \item{Nome}{station name}
 \item{TipoEstacao}{station type}

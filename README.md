@@ -47,6 +47,8 @@ head(hidro_metadata)
 #> 4 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
 #> 5 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
 #> 6 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
+comment(hidro_metadata)
+#> [1] "Updated on Hidroweb in:2018-02-09"
 ```
 
 To download data, for some stations:
@@ -62,28 +64,28 @@ down_stns <- hidroweb_down(stations = stns,
 #> -----------------------------------------------
 #> > 42650000: Vazao
 #> elapsed 
-#>   2.543
+#>    2.29
 #> Station: 42650000 also has data of:
 #> Cotas
 #> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 42650000, option Vazao.
 #> -----------------------------------------------
 #> > 42650000: Chuva
 #> elapsed 
-#>   2.203
+#>   2.131
 #> Station: 42650000 also has data of: 
 #> Cotas
 #> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 42650000, option Chuva.
 #> -----------------------------------------------
 #> > 00252001: Vazao
 #> elapsed 
-#>    2.38
+#>   2.077
 #> Station: 00252001 also has data of:
 #> Chuvas
 #> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 00252001, option Vazao.
 #> -----------------------------------------------
 #> > 00252001: Chuva
 #> elapsed 
-#>   41.75
+#>  41.334
 #> File saved in 
 #>  /home/pqgfapergs1/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
 down_stns
