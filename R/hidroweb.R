@@ -1,5 +1,5 @@
 
-#' Download station data files from Hidroweb
+#' Download station data files from Hidroweb database
 #'
 #' @param stations character vector with code of stations
 #' @param options character vector with one or more options: "Cota", "Vazao",
