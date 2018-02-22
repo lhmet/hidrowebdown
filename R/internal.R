@@ -256,17 +256,14 @@ parse_options <- function(txt){
   return(dest_file)
 }
 
-# show more options when hydroweb have more than one data type per station-----
-.show_data_options <- function(.station, .metadata, .option){
-  #other_opts <- dplyr::select(.metadata, options)
-  other_opts <- dplyr::filter(.metadata, 
-                              !stringr::str_detect(options, substr(.option, 1, 3))
-                              )
-  other_opts <- dplyr::pull(other_opts, options)
-    
+# show more options of data type for the station-------------------------------
+.show_data_options <- function(x, .station){
+  
+  other_opts <- dplyr::pull(x, option)
   #other_opts <- other_opts[charmatch(substr(.option, 1, 3), other_opts)]
-  message("Station: ", .station, " also have data of: ")
+  message("Station: ", .station, " have data of: ")
   message(paste(other_opts, collapse = ", "),"\n")
+  invisible(NULL)
 }
 
 
@@ -322,6 +319,7 @@ hidroweb_template <- function(.stn, .meta){
   # station = "02447049"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   # 36458000, cadastrada mas sem dados
   # station = "60473000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
+  # station = "55747000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -341,30 +339,28 @@ hidroweb_template <- function(.stn, .meta){
     return(tbl_template)
   }
   
-  # option to POST request of data file
-  hidroweb_opts <- .get_station_options(hidroweb_cont, station)
-  hidroweb_opts_current <- dplyr::filter(hidroweb_opts, selected)
-  # PODE OCORRER DE  NAO TER NENHUMA SELECIONADA?
-  
-  # TO AQUI ----------
-  #if(metadata) 
-  hidroweb_meta <- .extract_metadata(hidroweb_cont)
-  # print(hidroweb_meta[["data_type"]][[1]])
-  #hidroweb_meta <- tidyr::unnest(hidroweb_meta)
-  
+  # get options required for POST request of data file-------------------------
+  hidroweb_opts_all <- .get_station_options(hidroweb_cont, station)
+  hidroweb_opts_all <- dplyr::mutate(hidroweb_opts_all, station = station)
+  hidroweb_opts_all <- dplyr::select(hidroweb_opts_all, station, option:selected)
+  hidroweb_opts_current <- dplyr::filter(hidroweb_opts_all, selected)
+  hidroweb_opts_others <- dplyr::filter(hidroweb_opts_all, !(selected))
 
-  
-  # pode ocorrer da estação não ter a opção solicitada
-  # verificar se a estacao tem a opcao
-  if (!stringr::str_detect(hidroweb_meta$options, substr(option, 1, 3))) {
-    hidroweb_meta <- dplyr::bind_rows(hidroweb_meta, hidroweb_meta)
-    hidroweb_meta$options[1] <- option
-    hidroweb_meta$cboTipoReg[1] <- NA_integer_
+  # get metadata
+  if (metadata) {
+    hidroweb_meta <- .extract_metadata(hidroweb_cont)
+  }
+
+  # pode ocorrer da estação não ter dados para a opção solicitada?
+  # check
+  if (!any(hidroweb_opts_current$selected)) {
+    # RETORNAR TEMPLATE?
+    message("RETURN TEMPLATE?")
   }
   
-  if ((nrow(hidroweb_meta) > 1 ) & verbose) {
+  if ((nrow(hidroweb_opts_others) > 1 ) && verbose) {
     # there is other data for this station
-    .show_data_options(station, hidroweb_meta, option)
+    .show_data_options(hidroweb_opts_others, station)
   }
   
   hidroweb_file <- .hydroweb_file(hidroweb_cont)
@@ -372,24 +368,27 @@ hidroweb_template <- function(.stn, .meta){
                           file.path(dirname(hidroweb_url), hidroweb_file),
                           hidroweb_file
                           )
-  
-  if(is.na(hidroweb_file)){
+  # check path to download file
+  if (is.na(hidroweb_file)) {
     hidroweb_down_file <- hidroweb_file
-    if(verbose) warning("No data was found for station ",
+    if (verbose) warning("No path to download data was found for station ",
                         station, ", option ", option,". \n")
   } else {
-    hidroweb_down_file<- .hydroweb_down_file(hidroweb_file, 
-                                             station, option, dest.dir, verbose)
+    hidroweb_down_file <- .hydroweb_down_file(hidroweb_file, 
+                                             station, 
+                                             option, 
+                                             dest.dir, 
+                                             verbose)
   }
-    
-  hidroweb_meta <- dplyr::filter(hidroweb_meta, 
-                                 stringr::str_detect(options, substr(option, 1, 3))
-  )
-  hidroweb_meta <- dplyr::mutate(hidroweb_meta, file = hidroweb_down_file)
+  
+  hidroweb_out <- dplyr::select(hidroweb_opts_current, station, option)
+  hidroweb_out <- dplyr::mutate(hidroweb_out, file = hidroweb_down_file)
+  if (metadata) {
+    hidroweb_out <- dplyr::left_join(hidroweb_out, hidroweb_meta, by = "station")
+  }
 
-  if(!metadata) hidroweb_meta <- dplyr::select(hidroweb_meta, station, file)
-  return(hidroweb_meta)
-} 
+  return(hidroweb_out)
+}
 
 
 # test_p <- .hydroweb_down_station(station = "02243151" , option = "Chuva", verbose = TRUE, dest.dir = "../")
