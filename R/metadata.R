@@ -226,7 +226,7 @@ hidroweb_metadata_live <- function(dest.dir) {
 }
 
 #hidroweb_metadata <- hidroweb_metadata_live(
-#   dest.dir = system.file("extdata",  "HIDRO.mdb", package = "hidrowebdown")
+#   dest.dir = system.file("extdata", "HIDRO.mdb", package = "hidrowebdown")
 #   )
 # usethis::use_data(hidroweb_metadata) 
 
