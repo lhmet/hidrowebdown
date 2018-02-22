@@ -219,7 +219,7 @@ hidroweb_metadata_live <- function(dest.dir) {
   m <- dplyr::left_join(stn_tbl_type, m, by = "Codigo")
   
   comment(m) <- paste0(
-    "Updated on Hidroweb in:",
+    "Last update on Hidroweb in: ",
     .last_update_metadata()
   )
   return(m)
