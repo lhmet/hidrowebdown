@@ -1,17 +1,6 @@
+#  source("utils-test.R")
 
-.check_response <- function(url) {
-  tryCatch(
-    unlist(httr::http_status(httr::GET(url))),
-    error = function(e) {
-      e$message <-
-        paste0(
-          "\nThe Hidroweb website does not appear to be responding.\n",
-          "Please try again later.\n"
-        )
-      stop(e)
-    }
-  )
-}
+
 
 .last_update_metadata <- function() {
   # data of last update of metadata ----------------------------------------------
@@ -30,49 +19,16 @@
 }
 
 
-#' Get metadata of hydrological stations from Hidroweb database
-#' @importFrom utils download.file unzip
-#' @importFrom rlang !! :=
-#' @return data frame with stations metadata
-#' @export 
-#' @examples 
-#' \dontrun{
-#' # how hidro_metadata was generated
-#' # donwload a mdb file of  ~200 Mb
-#' hidro_metadata <- hidroweb_meta()
-#' comments(hidro_metadata)
-#' }
-#'
-hidroweb_metadata_live <- function() {
-  
-  # file of stations metadata --------------------------------------------------
-  survey_url_file <-
-    "http://www.snirh.gov.br/hidroweb/Baixar/Software/Invent%C3%A1rio.zip"
-  
-  tmp_zip <- tempfile(fileext = ".zip")
-  on.exit(file.remove(tmp_zip))
-  utils::download.file(survey_url_file, destfile = tmp_zip)
-  
-  extracted_file <- utils::unzip(tmp_zip, list = TRUE)[["Name"]]
-  unzip(tmp_zip, exdir = dirname(tmp_zip))
-  
-  mdb_file <- file.path(dirname(tmp_zip), extracted_file)
-  on.exit(file.remove(mdb_file))
-  # file.exists(mdb_file)
-  
-  # d <- Hmisc::mdb.get(mdb_file)
-  # Hmisc::contents(d)
-  # Hmisc::mdb.get(mdb_file, tables=TRUE)
-  sel_tables <- c("Estacao", "Municipio", "Estado", "Bacia", 
-                  "SubBacia", "Rio")
-  tables <- Hmisc::mdb.get(mdb_file, tables = sel_tables)
-  tables_u <- lapply(
-    sel_tables,
+# Function for prep tbls before merge -----------------------------------------
+.prep_tbls_list <- function(tbls.sel, tbls){
+  lapply(
+    tbls.sel,
     function(itbl_nm) {
       # itbl_nm <- "Estacao"
-      itbl <- tables[[itbl_nm]]
+      itbl <- tbls[[itbl_nm]]
+      # factor to char
       itbl <- dplyr::mutate_if(itbl, is.factor, no_accent)
-      # vars to be renamed for merge
+      # rename vars  for merge
       var_cod <- paste0(itbl_nm, "Codigo")
       var_nm <- paste0(itbl_nm, "Nome")
       var_ibge <- paste0(itbl_nm, "CodigoIBGE")
@@ -97,7 +53,7 @@ hidroweb_metadata_live <- function() {
           dplyr::contains("Nome"),
           dplyr::contains("Sigla")
         )
-      } else { # if is the stations df (or 1st df)
+      } else {# if is the stations df (or 1st df)
         itbl <- dplyr::select(
           itbl,
           dplyr::one_of(
@@ -113,23 +69,138 @@ hidroweb_metadata_live <- function() {
       return(itbl)
     } # end anonymous function
   ) # end lapply
+}
+
+
+# function to tidy "Estacao" table returning a df with Codigo, Classe, Tipo
+.tidy_stn_tbl <- function(x){
+  # x <- tables[["Estacao"]]
+  
+  # variables selection
+  x <- dplyr::select(x,
+                     dplyr::one_of(
+                       c("Codigo", "TipoEstacao", 
+                         "TipoEstacaoEscala", "TipoEstacaoRegistradorNivel", 
+                         "TipoEstacaoDescLiquida", "TipoEstacaoSedimentos", 
+                         "TipoEstacaoQualAgua", "TipoEstacaoPluviometro", 
+                         "TipoEstacaoRegistradorChuva", 
+                         "TipoEstacaoTanqueEvapo", 
+                         "TipoEstacaoClimatologica", "TipoEstacaoPiezometria",
+                         "TipoEstacaoTelemetrica"
+                       )
+                     )
+  ) # end select
+  
+  # replace and make short names
+  names(x) <-  gsub("TipoEstacao","", names(x))
+  names(x)[names(x) == ""] <- "Classe"
+  
+  x <- dplyr::arrange(x, Codigo)
+  
+  # replace values for Classe: stations are Pluviometric or Fluviometric  
+  x <- 
+    dplyr::mutate(x, 
+                  Classe = ifelse(Classe == 1,
+                                  "Fluviometric",
+                                  "Pluviometric"
+                  )
+    )
+  
+  # folowwing 
+  # http://arquivos.ana.gov.br/infohidrologicas/InventariodasEstacoesPluviometricas.pdf
+  # http://arquivos.ana.gov.br/infohidrologicas/InventariodasEstacoesFluviometricas.pdf
+  x <- dplyr::rename(x,
+                     "P" = Pluviometro,
+                     "Pr" = RegistradorChuva,
+                     "E" = TanqueEvapo,
+                     "C" = Climatologica,
+                     "T" = Telemetrica,
+                     "Q" = QualAgua,
+                     "S" = Sedimentos,
+                     "D" = DescLiquida,
+                     "R" = RegistradorNivel,
+                     "F" = Escala
+  )
+  # xs in a long format to group Tipo
+  xs <- tidyr::gather(x, Tipo, value, -Codigo, -Classe)
+  xs <- dplyr::filter(xs, value == 1) 
+  xs <- dplyr::select(xs, -value) 
+  xs <- dplyr::arrange(xs, Codigo) 
+  by_code <- dplyr::group_by(xs, Codigo) 
+  by_code <- dplyr::summarise(by_code, 
+                              Classe = unique(Classe), 
+                              Tipo = str_collapse(Tipo))
+  by_code
+  return(by_code)
+}
+
+
+
+#' Get metadata of hydrological stations from Hidroweb database
+#' 
+#' @param dest.dir optional, character with the path to save the file (HIDRO.mdb)
+#' tha has all stations metadata.
+#' @importFrom utils download.file unzip
+#' @importFrom rlang !! :=
+#' @return data frame with stations metadata
+#' @export 
+#' @examples 
+#' \dontrun{
+#' # how hidro_metadata was generated
+#' # donwload a mdb file of  ~200 Mb
+#' hidro_metadata <- hidroweb_metadata_live()
+#' }
+#'
+hidroweb_metadata_live <- function(dest.dir) {
+  
+  # file of stations metadata --------------------------------------------------
+  survey_url_file <-
+    "http://www.snirh.gov.br/hidroweb/Baixar/Software/Invent%C3%A1rio.zip"
+  
+  
+  if(missing(dest.dir)) {
+    tmp_zip <- tempfile(fileext = ".zip")
+  } else {
+    tmp_zip <- file.path(dest.dir, basename(survey_url_file))
+  }
+  on.exit(file.remove(tmp_zip))
+  
+  utils::download.file(survey_url_file, destfile = tmp_zip)
+  
+  extracted_file <- utils::unzip(tmp_zip, list = TRUE)[["Name"]]
+  unzip(tmp_zip, exdir = dirname(tmp_zip))
+  
+  mdb_file <- file.path(dirname(tmp_zip), extracted_file)
+  if(missing(dest.dir)) on.exit(file.remove(mdb_file))
+  # file.exists(mdb_file)
+  
+  # mdb_file <- "HIDRO.mdb"
+  # Hmisc::contents(d)
+  # Hmisc::mdb.get(mdb_file, tables=TRUE)
+  sel_tables <- c("Estacao", "Municipio", "Estado", "Bacia", 
+                  "SubBacia", "Rio")
+  tables <- Hmisc::mdb.get(mdb_file, tables = sel_tables)
+  
+  # update tables 
+  tables_u <- .prep_tbls_list(tbls.sel = sel_tables, tbls = tables)
   
   attributes(tables_u) <- attributes(tables)
   # str(tables_u)
   
   # lapply(
-  #   tables_u,
+  #   tables,
   #   function(x) {
   #     names(x)
   #   }
   # )
   # merge all dfs
-  m <- Reduce(function(x, y) merge(x, y, all = TRUE), tables_u)
+  m <- tibble::as_tibble(Reduce(function(x, y) merge(x, y, all = TRUE), tables_u))
   # head(m)
-  rm(tables); rm(tables_u)
+  #rm(tables); rm(tables_u)
   m <- dplyr::select(m, -(BaciaCodigo:MunicipioCodigo), 
                      -MunicipioCodigoIBGE,
                      -EstadoCodigoIBGE,
+                     -TipoEstacao
   )
   m <- dplyr::rename(m,
                      "UF" = Sigla,
@@ -141,13 +212,17 @@ hidroweb_metadata_live <- function() {
                      "Nome" = EstacaoNome,
                      "Codigo" = EstacaoCodigo
   )
+  m <- dplyr::arrange(m, Codigo)
   
-
+  # merge with station
+  stn_tbl_type <- .tidy_stn_tbl(tables[["Estacao"]])
+  m <- dplyr::left_join(stn_tbl_type, m, by = "Codigo")
+  
   comment(m) <- paste0(
-    "Last update on Hidroweb in: ",
+    "Updated on Hidroweb in:",
     .last_update_metadata()
   )
-  return(tibble::as_tibble(m))
+  return(m)
 }
 
 # hidroweb_metadata <- hidroweb_metadata_live()
@@ -173,3 +248,4 @@ hidroweb_metadata_live <- function() {
 # To read tables in a mdb from hidroweb site, hidrowebdown uses the function mdb.get()
 # from Hmisc R-package. Please see ?Hmisc::mdb.get
 # In Debian/Ubuntu Linux run apt get install mdbtools.
+
