@@ -1,3 +1,17 @@
+# check url response ----------------------------------------------------------
+.check_response <- function(url) {
+  tryCatch(
+    unlist(httr::http_status(httr::GET(url))),
+    error = function(e) {
+      e$message <-
+        paste0(
+          "\nThe Hidroweb website does not appear to be responding.\n",
+          "Please try again later.\n"
+        )
+      stop(e)
+    }
+  )
+}
 
 utils::globalVariables(c("verbose", "zfile", "option", 
                          "Codigo", "Nome", "CodigoIBGE",
@@ -6,8 +20,13 @@ utils::globalVariables(c("verbose", "zfile", "option",
                          "MunicipioCodigoIBGE", "EstadoCodigoIBGE",
                          "Sigla", "RioNome", "SubBaciaNome",
                          "BaciaNome", "EstadoNome", "EstacaoCodigo",
-                         "cboTipoReg", "options", "cboTipoReg", "selected"
-))
+                         "cboTipoReg", "options", "cboTipoReg", "selected",
+                         "Classe", "Pluviometro", "RegistradorChuva",
+                         "TanqueEvapo", "Climatologica", "Telemetrica",
+                         "Escala", "Tipo", "value", "TipoEstacao",
+                         "QualAgua", "Sedimentos", "DescLiquida",
+                         "RegistradorNivel")
+                       )
 
 
 # handling special characters e.g. accents in R--------------------------------
