@@ -36,6 +36,7 @@ You can choose a hydrological station looking at the data `hidro_metadata`.
 library(hidrowebdown)
 # metadata
 head(hidro_metadata)
+comment(hidro_metadata)
 ```
 
 To download data, for some stations:
