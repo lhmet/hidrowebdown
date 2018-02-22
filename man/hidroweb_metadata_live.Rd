@@ -4,7 +4,11 @@
 \alias{hidroweb_metadata_live}
 \title{Get metadata of hydrological stations from Hidroweb database}
 \usage{
-hidroweb_metadata_live()
+hidroweb_metadata_live(dest.dir)
+}
+\arguments{
+\item{des.dir}{optional, character with the path to save the file (HIDRO.mdb)
+tha has all stations metadata.}
 }
 \value{
 data frame with stations metadata
@@ -16,8 +20,7 @@ Get metadata of hydrological stations from Hidroweb database
 \dontrun{
 # how hidro_metadata was generated
 # donwload a mdb file of  ~200 Mb
-hidro_metadata <- hidroweb_meta()
-comments(hidro_metadata)
+hidro_metadata <- hidroweb_metadata_live()
 }
 
 }
