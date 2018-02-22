@@ -7,7 +7,7 @@
 hidroweb_metadata_live(dest.dir)
 }
 \arguments{
-\item{des.dir}{optional, character with the path to save the file (HIDRO.mdb)
+\item{dest.dir}{optional, character with the path to save the file (HIDRO.mdb)
 tha has all stations metadata.}
 }
 \value{
