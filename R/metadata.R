@@ -225,12 +225,12 @@ hidroweb_metadata_live <- function(dest.dir) {
   return(m)
 }
 
-#hidroweb_metadata <- hidroweb_metadata_live(
-#   dest.dir = system.file("extdata", "HIDRO.mdb", package = "hidrowebdown")
+# hidroweb_metadata <- hidroweb_metadata_live(
+#   dest.dir = system.file("extdata", package = "hidrowebdown")
 #   )
 # usethis::use_data(hidroweb_metadata) 
 
-
+ 
 # know issue
 # when mdbtools is not installed - required by Hmisc package to read .mdb file in unix
 # trying URL 'http://www.snirh.gov.br/hidroweb/Baixar/Software/Invent%C3%A1rio.zip'
