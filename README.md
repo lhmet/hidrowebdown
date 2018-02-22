@@ -59,37 +59,31 @@ ctl <- hidroweb_down(stations = stns, options = opts,
 #> -----------------------------------------------
 #> > 42650000: Vazao
 #> elapsed 
-#>   2.081
-#> Station: 42650000 also have data of:
-#> Cotas
-#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No data was found for station 42650000, option Vazao.
+#>   2.034
+#> RETURN TEMPLATE?
+#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No path to download data was found for station 42650000, option Vazao.
 #> -----------------------------------------------
 #> > 42650000: Chuva
 #> elapsed 
-#>   2.145
-#> Station: 42650000 also have data of: 
-#> Cotas
-#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No data was found for station 42650000, option Chuva.
+#>   2.097
+#> RETURN TEMPLATE?
+#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No path to download data was found for station 42650000, option Chuva.
 #> -----------------------------------------------
 #> > 00252001: Vazao
 #> elapsed 
-#>   2.051
-#> Station: 00252001 also have data of:
-#> Chuvas
-#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No data was found for station 00252001, option Vazao.
+#>   2.025
+#> RETURN TEMPLATE?
+#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No path to download data was found for station 00252001, option Vazao.
 #> -----------------------------------------------
 #> > 00252001: Chuva
 #> elapsed 
-#>  43.477
+#>  39.068
 #> File saved in 
-#>  /home/pqgfapergs1/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
+#>  /home/hidrometeorologista/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
 ctl
-#> # A tibble: 4 x 14
-#>   station    lon    lat   alt  area name  state city  river basin subbasin
-#>   <chr>    <dbl>  <dbl> <dbl> <dbl> <chr> <chr> <chr> <chr> <chr> <chr>   
-#> 1 42650000 -46.1 -17.1    505  1240 BARR… MINA… JOAO… RIO … RIO … RIOS SA…
-#> 2 42650000 -46.1 -17.1    505  1240 BARR… MINA… JOAO… RIO … RIO … RIOS SA…
-#> 3 00252001 -52.9 - 2.34    NA    NA ITAP… PARA  PORT… <NA>  RIO … RIO AMA…
-#> 4 00252001 -52.9 - 2.34    NA    NA ITAP… PARA  PORT… <NA>  RIO … RIO AMA…
-#> # ... with 3 more variables: options <chr>, cboTipoReg <int>, file <chr>
+#> # A tibble: 1 x 13
+#>   station  option file       lon   lat   alt  area name  state city  river
+#>   <chr>    <chr>  <chr>    <dbl> <dbl> <dbl> <dbl> <chr> <chr> <chr> <chr>
+#> 1 00252001 Chuvas /home/h… -52.9 -2.34    NA    NA ITAP… PARA  PORT… <NA> 
+#> # ... with 2 more variables: basin <chr>, subbasin <chr>
 ```
