@@ -278,6 +278,8 @@ parse_options <- function(txt){
 hidroweb_template <- function(.stn, .meta){
   if (.meta) {
     res <- tibble::tibble(station = .stn,
+                          option = NA,
+                          file = NA
                           lon = NA,
                           lat = NA,
                           alt = NA,
@@ -287,10 +289,7 @@ hidroweb_template <- function(.stn, .meta){
                           city = NA_character_,
                           river = NA_character_,
                           basin = NA_character_,
-                          subbasin = NA_character_,
-                          options = NA_character_,
-                          cboTipoReg = NA,
-                          file = NA_character_)
+                          subbasin = NA_character_)
     return(res)
   }
   res <- tibble::tibble(station = .stn,
@@ -351,14 +350,16 @@ hidroweb_template <- function(.stn, .meta){
     hidroweb_meta <- .extract_metadata(hidroweb_cont)
   }
 
-  # Station with no data for requested option but has data for another option
-  if (nrow(hidroweb_opts_current) == 0 &&  nrow(hidroweb_opts_others) > 0) {
-    # check current opts  fill with 
-      hidroweb_opts_current <- hidroweb_opts_all
-      hidroweb_opts_current <- dplyr::mutate(hidroweb_opts_current,
-                                             option = NA_character_,
-                                             option_num = NA_character_)
+  # Station with no data for requested option 
+  # but maybe has data for another option 
+  if (nrow(hidroweb_opts_current) == 0) {
+    # check current opts, fill it NAs 
+      hidroweb_opts_current <- tibble::tibble(station = station,
+                                              option = option,
+                                              option_num = NA,
+                                              selected = FALSE)
   }
+  
   
   if ((nrow(hidroweb_opts_others) >= 1 ) && verbose) {
     # there is other data for this station
@@ -395,8 +396,8 @@ hidroweb_template <- function(.stn, .meta){
 }
 
 
-# test_p <- .hydroweb_down_station(station = "02243151" , option = "Chuva", verbose = TRUE, dest.dir = "../")
-# test_c <- .hydroweb_down_station(station = "02352066" , option = "Clima", verbose = TRUE, dest.dir = "../")
+# test_p <- .hydroweb_down_station(station = "02243151" , option = "Clima", verbose = TRUE, dest.dir = "../", metadata =FALSE)
+# test_c <- .hydroweb_down_station(station = "60475000" , option = "Cota", verbose = TRUE, dest.dir = "../", metadata = TRUE)
 
 
 # > 02447049: Clima
