@@ -150,8 +150,8 @@ hidroweb_metadata_live <- function() {
   return(tibble::as_tibble(m))
 }
 
-# hidro_metada <- hidroweb_meta()
-# usethis::use_data(hidro_metada) 
+# hidroweb_metadata <- hidroweb_metadata_live()
+# usethis::use_data(hidroweb_metadata) 
 
 
 # know issue
