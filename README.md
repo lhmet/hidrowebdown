@@ -54,36 +54,45 @@ To download data, for some stations:
 ``` r
 stns <- c("42650000", "00252001")
 opts <- c("Vazao", "Chuva")
-ctl <- hidroweb_down(stations = stns, options = opts, 
-                     verbose = TRUE, dest.dir = "../", meta = TRUE)
+down_stns <- hidroweb_down(stations = stns, 
+                     options = opts, 
+                     verbose = TRUE, 
+                     dest.dir = "../", 
+                     meta = TRUE)
 #> -----------------------------------------------
 #> > 42650000: Vazao
 #> elapsed 
-#>   2.034
-#> RETURN TEMPLATE?
-#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No path to download data was found for station 42650000, option Vazao.
+#>   2.543
+#> Station: 42650000 also has data of:
+#> Cotas
+#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 42650000, option Vazao.
 #> -----------------------------------------------
 #> > 42650000: Chuva
 #> elapsed 
-#>   2.097
-#> RETURN TEMPLATE?
-#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No path to download data was found for station 42650000, option Chuva.
+#>   2.203
+#> Station: 42650000 also has data of: 
+#> Cotas
+#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 42650000, option Chuva.
 #> -----------------------------------------------
 #> > 00252001: Vazao
 #> elapsed 
-#>   2.025
-#> RETURN TEMPLATE?
-#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): No path to download data was found for station 00252001, option Vazao.
+#>    2.38
+#> Station: 00252001 also has data of:
+#> Chuvas
+#> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 00252001, option Vazao.
 #> -----------------------------------------------
 #> > 00252001: Chuva
 #> elapsed 
-#>  39.068
+#>   41.75
 #> File saved in 
-#>  /home/hidrometeorologista/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
-ctl
-#> # A tibble: 1 x 13
-#>   station  option file       lon   lat   alt  area name  state city  river
-#>   <chr>    <chr>  <chr>    <dbl> <dbl> <dbl> <dbl> <chr> <chr> <chr> <chr>
-#> 1 00252001 Chuvas /home/h… -52.9 -2.34    NA    NA ITAP… PARA  PORT… <NA> 
+#>  /home/pqgfapergs1/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
+down_stns
+#> # A tibble: 4 x 13
+#>   station  option file      lon    lat   alt  area name  state city  river
+#>   <chr>    <chr>  <chr>   <dbl>  <dbl> <dbl> <dbl> <chr> <chr> <chr> <chr>
+#> 1 42650000 Vazao  <NA>    -46.1 -17.1    505  1240 BARR… MINA… JOAO… RIO …
+#> 2 42650000 Chuva  <NA>    -46.1 -17.1    505  1240 BARR… MINA… JOAO… RIO …
+#> 3 00252001 Vazao  <NA>    -52.9 - 2.34    NA    NA ITAP… PARA  PORT… <NA> 
+#> 4 00252001 Chuvas /home/… -52.9 - 2.34    NA    NA ITAP… PARA  PORT… <NA> 
 #> # ... with 2 more variables: basin <chr>, subbasin <chr>
 ```
