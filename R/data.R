@@ -3,7 +3,7 @@
 #' A dataset containing coordinates and additional attributes of 46036
 #'  hydrological stations
 #'
-#'@name hidro_metadata
+#'@name hidroweb_metadata
 #'@keywords datasets
 #'@docType data
 #'
@@ -24,4 +24,4 @@
 #' \item{Rio}{river name}
 #' }
 #' @source \url{http://hidroweb.ana.gov.br/HidroWeb.asp?TocItem=6010#inventario}
-"hidro_metadata"
+"hidroweb_metadata"
