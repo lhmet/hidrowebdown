@@ -261,7 +261,7 @@ parse_options <- function(txt){
   
   other_opts <- dplyr::pull(x, option)
   #other_opts <- other_opts[charmatch(substr(.option, 1, 3), other_opts)]
-  message("Station: ", .station, " have data of: ")
+  message("Station: ", .station, " also has data of: ")
   message(paste(other_opts, collapse = ", "),"\n")
   invisible(NULL)
 }
@@ -319,7 +319,7 @@ hidroweb_template <- function(.stn, .meta){
   # station = "02447049"; option = "Clima"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   # 36458000, cadastrada mas sem dados
   # station = "60473000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
-  # station = "55747000"; option = "Vazao"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
+  # station = "42650000"; option = "Chuva"; metadata = TRUE; verbose = TRUE; dest.dir = "../"
   station <- as.character(station)
   hidroweb_url <- .hidroweb_url(station)
     # form to POST
@@ -351,14 +351,16 @@ hidroweb_template <- function(.stn, .meta){
     hidroweb_meta <- .extract_metadata(hidroweb_cont)
   }
 
-  # pode ocorrer da estação não ter dados para a opção solicitada?
-  # check
-  if (!any(hidroweb_opts_current$selected)) {
-    # RETORNAR TEMPLATE?
-    message("RETURN TEMPLATE?")
+  # Station with no data for requested option but has data for another option
+  if (nrow(hidroweb_opts_current) == 0 &&  nrow(hidroweb_opts_others) > 0) {
+    # check current opts  fill with 
+      hidroweb_opts_current <- hidroweb_opts_all
+      hidroweb_opts_current <- dplyr::mutate(hidroweb_opts_current,
+                                             option = NA_character_,
+                                             option_num = NA_character_)
   }
   
-  if ((nrow(hidroweb_opts_others) > 1 ) && verbose) {
+  if ((nrow(hidroweb_opts_others) >= 1 ) && verbose) {
     # there is other data for this station
     .show_data_options(hidroweb_opts_others, station)
   }
@@ -371,8 +373,10 @@ hidroweb_template <- function(.stn, .meta){
   # check path to download file
   if (is.na(hidroweb_file)) {
     hidroweb_down_file <- hidroweb_file
-    if (verbose) warning("No path to download data was found for station ",
+    if (verbose) {
+      warning("There is no link to download requested data of station ",
                         station, ", option ", option,". \n")
+    }
   } else {
     hidroweb_down_file <- .hydroweb_down_file(hidroweb_file, 
                                              station, 
