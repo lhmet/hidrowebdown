@@ -1,6 +1,7 @@
 
 #' Download station data files from Hidroweb database
 #'
+#' @importFrom stats setNames
 #' @param stations character vector with code of stations
 #' @param options character vector with one or more options: "Cota", "Vazao",
 #'  "Chuva", "Qualidade", "Resumo", "Sedimento", "Perfil".
