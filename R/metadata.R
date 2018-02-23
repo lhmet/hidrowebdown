@@ -7,7 +7,7 @@
   # http://www.snirh.gov.br/hidroweb/HidroWeb.asp?TocItem=6010
   # Inventário atualizado em 09/02/2018 (last update).
   survey_url <- "http://hidroweb.ana.gov.br/HidroWeb.asp?TocItem=6010#inventario"
-  .check_response(survey_url)
+  #.check_response(survey_url)
   
   survey_page <- xml2::read_html(survey_url, encoding = "latin1")
   last_updt <- rvest::html_text(rvest::xml_nodes(survey_page, css = "font"))
@@ -109,29 +109,32 @@
   # folowwing 
   # http://arquivos.ana.gov.br/infohidrologicas/InventariodasEstacoesPluviometricas.pdf
   # http://arquivos.ana.gov.br/infohidrologicas/InventariodasEstacoesFluviometricas.pdf
-  x <- dplyr::rename(x,
-                     "P" = Pluviometro,
-                     "Pr" = RegistradorChuva,
-                     "E" = TanqueEvapo,
-                     "C" = Climatologica,
-                     "T" = Telemetrica,
-                     "Q" = QualAgua,
-                     "S" = Sedimentos,
-                     "D" = DescLiquida,
-                     "R" = RegistradorNivel,
-                     "F" = Escala
-  )
+  
+  # x <- dplyr::rename(x,
+  #                    "P" = Pluviometro,
+  #                    "Pr" = RegistradorChuva,
+  #                    "E" = TanqueEvapo,
+  #                    "C" = Climatologica,
+  #                    "T" = Telemetrica,
+  #                    "Q" = QualAgua,
+  #                    "S" = Sedimentos,
+  #                    "D" = DescLiquida,
+  #                    "R" = RegistradorNivel,
+  #                    "F" = Escala
+  # )
+  
   # xs in a long format to group Tipo
-  xs <- tidyr::gather(x, Tipo, value, -Codigo, -Classe)
-  xs <- dplyr::filter(xs, value == 1) 
-  xs <- dplyr::select(xs, -value) 
-  xs <- dplyr::arrange(xs, Codigo) 
-  by_code <- dplyr::group_by(xs, Codigo) 
-  by_code <- dplyr::summarise(by_code, 
-                              Classe = unique(Classe), 
-                              Tipo = str_collapse(Tipo))
-  by_code
-  return(by_code)
+  #xs <- tidyr::gather(x, Tipo, value, -Codigo, -Classe)
+  #xs <- dplyr::filter(xs, value == 1) 
+  #xs <- dplyr::select(xs, -value) 
+  #xs <- dplyr::arrange(xs, Codigo) 
+  #by_code <- dplyr::group_by(xs, Codigo) 
+  #by_code <- dplyr::summarise(by_code, 
+  #                            Classe = unique(Classe), 
+  #                            Tipo = str_collapse(Tipo))
+  #by_code
+  #return(by_code)
+  return(x)
 }
 
 
@@ -174,7 +177,7 @@ hidroweb_metadata_live <- function(dest.dir) {
   if(missing(dest.dir)) on.exit(file.remove(mdb_file))
   # file.exists(mdb_file)
   
-  # mdb_file <- "HIDRO.mdb"
+  # mdb_file <- "inst/extdata/HIDRO.mdb"
   # Hmisc::contents(d)
   # Hmisc::mdb.get(mdb_file, tables=TRUE)
   sel_tables <- c("Estacao", "Municipio", "Estado", "Bacia", 
@@ -215,13 +218,31 @@ hidroweb_metadata_live <- function(dest.dir) {
   m <- dplyr::arrange(m, Codigo)
   
   # merge with station
-  stn_tbl_type <- .tidy_stn_tbl(tables[["Estacao"]])
-  m <- dplyr::left_join(stn_tbl_type, m, by = "Codigo")
+  stn_tbl_type <- tibble::as_tibble(.tidy_stn_tbl(tables[["Estacao"]]))
+  m <- dplyr::right_join(m, stn_tbl_type, by = "Codigo")
   
   comment(m) <- paste0(
     "Last update on Hidroweb in: ",
     .last_update_metadata()
   )
+  
+  # rename variables
+  m <- dplyr::rename(m,
+                     "station" = Codigo,
+                     "lon" = Longitude,
+                     "lat" = Latitude,
+                     "alt" = Altitude,
+                     "area" = AreaDrenagem,
+                     "name" = Nome,
+                     "city" = Municipio,
+                     "state" = Estado,
+                     "uf" = UF,
+                     "basin" = Bacia,
+                     "subbasin" = SubBacia,
+                     "river" = Rio,
+                     "class" = Classe
+                     )
+  # to do translation for othe vars
   return(m)
 }
 
@@ -230,7 +251,7 @@ hidroweb_metadata_live <- function(dest.dir) {
 #   )
 # usethis::use_data(hidroweb_metadata) 
 
- 
+
 # know issue
 # when mdbtools is not installed - required by Hmisc package to read .mdb file in unix
 # trying URL 'http://www.snirh.gov.br/hidroweb/Baixar/Software/Invent%C3%A1rio.zip'
