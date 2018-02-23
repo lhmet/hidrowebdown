@@ -249,7 +249,7 @@ hidroweb_metadata_live <- function(dest.dir) {
 # hidroweb_metadata <- hidroweb_metadata_live(
 #   dest.dir = system.file("extdata", package = "hidrowebdown")
 #   )
-# usethis::use_data(hidroweb_metadata) 
+# usethis::use_data(hidroweb_metadata, overwrite = TRUE) 
 
 
 # know issue
