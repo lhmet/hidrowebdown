@@ -1,6 +1,6 @@
 #' Metadata of hydrological stations on Hidroweb database
 #'
-#' A dataset containing coordinates and additional attributes of 46036
+#' A dataset containing coordinates and additional attributes of 35520
 #'  hydrological stations
 #'
 #'@name hidroweb_metadata

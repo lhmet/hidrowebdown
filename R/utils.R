@@ -1,17 +1,3 @@
-# check url response ----------------------------------------------------------
-.check_response <- function(url) {
-  tryCatch(
-    unlist(httr::http_status(httr::GET(url))),
-    error = function(e) {
-      e$message <-
-        paste0(
-          "\nThe Hidroweb website does not appear to be responding.\n",
-          "Please try again later.\n"
-        )
-      stop(e)
-    }
-  )
-}
 
 utils::globalVariables(c("verbose", "zfile", "option", 
                          "Codigo", "Nome", "CodigoIBGE",
