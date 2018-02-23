@@ -1,6 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-**UNDER CONSTRUCTION**
+**WORK IN PROGRESS**
 
 hidrowebdown
 ============
@@ -20,35 +20,49 @@ devtools::install_github("lhmet/hidrowebdown")
 Example
 -------
 
-You can choose a hydrological station looking at the data `hidro_metadata`.
+You can choose a hydrological station looking at the data `hidroweb_metadata`.
 
 ``` r
 library(hidrowebdown)
 # metadata
-head(hidro_metadata)
-#>     Codigo Longitude Latitude Altitude AreaDrenagem                 Nome
-#> 1 10011600  -78.4481  -1.5300     2460          223      PUELA AJ CHAMBO
-#> 2 10012000  -78.1767  -1.4283     1150           NA   PASTAZA AJ ENCANTO
-#> 3 10011200  -78.5494  -1.2364     2310          407 PACHANLICA AJ AMBATO
-#> 4 10010900  -78.7731  -0.7758     3060           91  NEGRO AJ PUMANCUCHI
-#> 5 10011300  -78.4211  -1.3897     1729         7983     PASTAZA EN BANOS
-#> 6 10011100  -78.6628  -1.2589     2680          763     AMBATO EN AMBATO
-#>   TipoEstacao Municipio  Estado UF        Bacia
-#> 1           1   EQUADOR EQUADOR EQ RIO AMAZONAS
-#> 2           1   EQUADOR EQUADOR EQ RIO AMAZONAS
-#> 3           1   EQUADOR EQUADOR EQ RIO AMAZONAS
-#> 4           1   EQUADOR EQUADOR EQ RIO AMAZONAS
-#> 5           1   EQUADOR EQUADOR EQ RIO AMAZONAS
-#> 6           1   EQUADOR EQUADOR EQ RIO AMAZONAS
-#>                       SubBacia         Rio
-#> 1 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
-#> 2 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
-#> 3 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
-#> 4 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
-#> 5 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
-#> 6 RIO SOLIMOES, JAVARI,ITACUAI RIO PASTAZA
-comment(hidro_metadata)
-#> [1] "Updated on Hidroweb in:2018-02-09"
+head(hidroweb_metadata)
+#>   station      lon     lat alt area        name        city state uf
+#> 1   47000 -47.5500 -0.6500  14   NA SALINOPOLIS SALINOPOLIS  PARA PA
+#> 2   47001 -47.5000 -0.8333  68   NA    MARACANA    MARACANA  PARA PA
+#> 3   47002 -47.3536 -0.6231  NA   NA SALINOPOLIS SALINOPOLIS  PARA PA
+#> 4   47003 -47.8536 -0.7375  NA   NA      CURUCA      CURUCA  PARA PA
+#> 5   47004 -47.0994 -0.9294  NA   NA   PRIMAVERA   PRIMAVERA  PARA PA
+#> 6   47005 -47.6583 -0.6336  NA   NA      MARUDA   MARAPANIM  PARA PA
+#>                             basin                     subbasin river
+#> 1 ATLANTICO,TRECHO NORTE/NORDESTE RIOS GURUPI,TURIACU E OUTROS  <NA>
+#> 2 ATLANTICO,TRECHO NORTE/NORDESTE RIOS GURUPI,TURIACU E OUTROS  <NA>
+#> 3 ATLANTICO,TRECHO NORTE/NORDESTE RIOS GURUPI,TURIACU E OUTROS  <NA>
+#> 4 ATLANTICO,TRECHO NORTE/NORDESTE RIOS GURUPI,TURIACU E OUTROS  <NA>
+#> 5 ATLANTICO,TRECHO NORTE/NORDESTE RIOS GURUPI,TURIACU E OUTROS  <NA>
+#> 6 ATLANTICO,TRECHO NORTE/NORDESTE RIOS GURUPI,TURIACU E OUTROS  <NA>
+#>          class Escala RegistradorNivel DescLiquida Sedimentos QualAgua
+#> 1 Pluviometric      0                0           0          0        0
+#> 2 Pluviometric      0                0           0          0        0
+#> 3 Pluviometric      0                0           0          0        0
+#> 4 Pluviometric      0                0           0          0        0
+#> 5 Pluviometric      0                0           0          0        0
+#> 6 Pluviometric      0                0           0          0        0
+#>   Pluviometro RegistradorChuva TanqueEvapo Climatologica Piezometria
+#> 1           0                0           0             0           0
+#> 2           1                0           0             0           0
+#> 3           1                0           0             0           0
+#> 4           1                0           0             0           0
+#> 5           1                0           0             0           0
+#> 6           1                0           0             0           0
+#>   Telemetrica
+#> 1           0
+#> 2           0
+#> 3           1
+#> 4           1
+#> 5           0
+#> 6           0
+comment(hidroweb_metadata)
+#> [1] "Last update on Hidroweb in: 2018-02-09"
 ```
 
 To download data, for some stations:
@@ -64,30 +78,30 @@ down_stns <- hidroweb_down(stations = stns,
 #> -----------------------------------------------
 #> > 42650000: Vazao
 #> elapsed 
-#>    2.29
+#>   2.498
 #> Station: 42650000 also has data of:
 #> Cotas
 #> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 42650000, option Vazao.
 #> -----------------------------------------------
 #> > 42650000: Chuva
 #> elapsed 
-#>   2.131
+#>   2.284
 #> Station: 42650000 also has data of: 
 #> Cotas
 #> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 42650000, option Chuva.
 #> -----------------------------------------------
 #> > 00252001: Vazao
 #> elapsed 
-#>   2.077
+#>   1.749
 #> Station: 00252001 also has data of:
 #> Chuvas
 #> Warning in .hydroweb_down_station(.x, .y, dest.dir, verbose, metadata = meta): There is no link to download requested data of station 00252001, option Vazao.
 #> -----------------------------------------------
 #> > 00252001: Chuva
 #> elapsed 
-#>  41.334
+#>  40.083
 #> File saved in 
-#>  /home/pqgfapergs1/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
+#>  /home/hidrometeorologista/Dropbox/github/my_reps/lhmet/00252001_Chuva.zip.
 down_stns
 #> # A tibble: 4 x 13
 #>   station  option file      lon    lat   alt  area name  state city  river

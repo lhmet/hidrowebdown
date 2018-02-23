@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-**UNDER CONSTRUCTION**
+**WORK IN PROGRESS**
 
 # hidrowebdown
 
@@ -30,13 +30,13 @@ devtools::install_github("lhmet/hidrowebdown")
 
 ## Example
 
-You can choose a hydrological station looking at the data `hidro_metadata`.
+You can choose a hydrological station looking at the data `hidroweb_metadata`.
 
 ```{r}
 library(hidrowebdown)
 # metadata
-head(hidro_metadata)
-comment(hidro_metadata)
+head(hidroweb_metadata)
+comment(hidroweb_metadata)
 ```
 
 To download data, for some stations:
