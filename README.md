@@ -1,6 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-**WORK IN PROGRESS**
+**DISCONTINUED PACKAGE** after recent changes in the hidroweb site.
 
 hidrowebdown
 ============
